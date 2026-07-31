@@ -5,7 +5,6 @@ module.exports = {
     START_SCORE: 100,
     WIN_SCORE: 10,
     DISCONNECT_GRACE_MS: 10000,
-    DISCONNECT_PENALTY: 10,
     GAME_TYPES: ['erdayi', 'gomoku', 'tictactoe'],
     GAME_NAMES: { erdayi: '二打一', gomoku: '五子棋', tictactoe: '井字棋' },
     PORT: process.env.PORT || 3000,

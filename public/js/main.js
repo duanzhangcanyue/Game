@@ -285,15 +285,36 @@ socket.on('restartDeclined', () => {
     if (state.activeGame) state.activeGame.updateUI(ctx);
 });
 
-socket.on('opponentDisconnected', () => {
-    els.status.textContent = '对手已断开连接';
-    els.info.textContent = '等待对方重连（10 秒）...';
+let graceCountdown = null;
+
+function stopGraceCountdown() {
+    if (graceCountdown) { clearInterval(graceCountdown); graceCountdown = null; }
+}
+
+function startGraceCountdown(timeout) {
+    stopGraceCountdown();
+    let left = Math.ceil(timeout / 1000);
+    els.status.textContent = '对方已退出，正在等待重连...';
+    els.info.textContent = `对方 ${left} 秒内未返回，你将自动获胜`;
+    graceCountdown = setInterval(() => {
+        left--;
+        if (left <= 0) {
+            stopGraceCountdown();
+            return;
+        }
+        els.info.textContent = `对方 ${left} 秒内未返回，你将自动获胜`;
+    }, 1000);
+}
+
+socket.on('opponentDisconnected', (data) => {
     els.restartBtn.disabled = true;
     els.restartConfirm.style.display = 'none';
     if (state.activeGame) state.activeGame.setPaused(true);
+    startGraceCountdown((data && data.timeout) || 10000);
 });
 
 socket.on('opponentReconnected', () => {
+    stopGraceCountdown();
     els.status.textContent = '';
     els.info.textContent = '对方已重连，继续对局';
     els.restartBtn.disabled = false;
@@ -301,8 +322,9 @@ socket.on('opponentReconnected', () => {
 });
 
 socket.on('opponentDisconnectTimeout', () => {
-    els.status.textContent = '对手未在 10 秒内重连';
-    els.info.textContent = '对方被扣除 10 积分，可等待新对手加入';
+    stopGraceCountdown();
+    els.status.textContent = '你获胜了！';
+    els.info.textContent = '对方未在 10 秒内返回，积分 +10';
     els.restartBtn.disabled = true;
     els.restartConfirm.style.display = 'none';
     const mine = els.playerBlack.classList.contains('me') ? els.playerBlack : els.playerWhite;
@@ -312,6 +334,8 @@ socket.on('opponentDisconnectTimeout', () => {
     const sym = other.querySelector('.player-sym');
     sym.className = 'player-sym';
     sym.textContent = '';
+    state.started = false;
+    if (state.activeGame) state.activeGame.renderWaiting(ctx);
 });
 
 socket.on('resumeGame', (data) => {

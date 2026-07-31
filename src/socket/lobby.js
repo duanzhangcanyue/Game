@@ -1,5 +1,6 @@
 const { rooms, roomSummary, broadcastRooms, getRoomForUser, startGame, resetRoom } = require('../rooms');
 const { getScore } = require('../users');
+const { startGrace, cancelGrace } = require('../grace');
 const config = require('../config');
 
 module.exports = function registerLobby(io, socket) {
@@ -16,7 +17,10 @@ module.exports = function registerLobby(io, socket) {
         const room = rooms[id];
         if (room.players.length > 0) return cb && cb({ ok: false, msg: '房间已被占用' });
         const myRoom = getRoomForUser(username);
-        if (myRoom) return cb && cb({ ok: false, msg: `你已在房间 ${myRoom.id} 中` });
+        if (myRoom) {
+            if (myRoom.disconnected[username]) return cb && cb({ ok: false, msg: '你刚退出房间，请等待 10 秒倒计时结束' });
+            return cb && cb({ ok: false, msg: `你已在房间 ${myRoom.id} 中` });
+        }
         room.password = password || '';
         room.gameType = type;
         room.players = [username];
@@ -36,7 +40,10 @@ module.exports = function registerLobby(io, socket) {
         if (room.players.length >= 2) return cb && cb({ ok: false, msg: '房间已满' });
         if (room.password && room.password !== (password || '')) return cb && cb({ ok: false, msg: '房间密码错误' });
         const myRoom = getRoomForUser(username);
-        if (myRoom) return cb && cb({ ok: false, msg: `你已在房间 ${myRoom.id} 中` });
+        if (myRoom) {
+            if (myRoom.disconnected[username]) return cb && cb({ ok: false, msg: '你刚退出房间，请等待 10 秒倒计时结束' });
+            return cb && cb({ ok: false, msg: `你已在房间 ${myRoom.id} 中` });
+        }
         if (room.players.includes(username)) return cb && cb({ ok: false, msg: '你已在房间中' });
         if (room.players.length === 0 && config.GAME_TYPES.includes(gameType)) {
             room.gameType = gameType;
@@ -55,12 +62,15 @@ module.exports = function registerLobby(io, socket) {
         const username = socket.data.username;
         const id = Number(roomId);
         const room = rooms[id];
-        if (!room) return cb && cb({ ok: false });
-        room.players = room.players.filter(p => p !== username);
+        if (!room || !room.players.includes(username)) return cb && cb({ ok: false });
         socket.leave('room_' + id);
-        if (room.players.length === 1) {
-            io.to('room_' + id).emit('opponentLeft');
+        if (room.players.length === 2 && !room.disconnected[username]) {
+            startGrace(io, room, username, socket);
+            cb && cb({ ok: true });
+            console.log(`${username} 退出房间 ${id}，进入 10 秒倒计时`);
+            return;
         }
+        room.players = room.players.filter(p => p !== username);
         if (room.players.length === 0) {
             resetRoom(room);
         }

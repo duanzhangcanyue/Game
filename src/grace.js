@@ -1,0 +1,60 @@
+const config = require('./config');
+const { resetRoom, broadcastRooms } = require('./rooms');
+const { users, saveUsers } = require('./users');
+
+function startGrace(io, room, username, socket) {
+    if (room.disconnected[username]) return;
+    room.disconnected[username] = true;
+    if (!room.graceSockets) room.graceSockets = {};
+    room.graceSockets[username] = socket || null;
+    room.disconnectTimers[username] = setTimeout(() => {
+        finishGrace(io, room, username);
+    }, config.DISCONNECT_GRACE_MS);
+    io.to('room_' + room.id).emit('opponentDisconnected', {
+        username,
+        timeout: config.DISCONNECT_GRACE_MS
+    });
+    console.log(`玩家 ${username} 断开/退出，房间 ${room.id} 进入 ${config.DISCONNECT_GRACE_MS / 1000} 秒倒计时`);
+}
+
+function cancelGrace(room, username) {
+    clearTimeout(room.disconnectTimers[username]);
+    delete room.disconnectTimers[username];
+    delete room.disconnected[username];
+    if (room.graceSockets) delete room.graceSockets[username];
+}
+
+function finishGrace(io, room, username) {
+    if (!room.disconnected[username]) return;
+    const leaverSocket = room.graceSockets ? room.graceSockets[username] : null;
+    delete room.disconnected[username];
+    delete room.disconnectTimers[username];
+    if (room.graceSockets) delete room.graceSockets[username];
+    room.players = room.players.filter(p => p !== username);
+    room.turn = null;
+    room.boardState = null;
+    room.over = false;
+    if (room.players.length === 1) {
+        const winner = room.players[0];
+        if (!room.disconnected[winner] && users[winner] && users[username]) {
+            users[winner].score += config.WIN_SCORE;
+            users[username].score = Math.max(0, users[username].score - config.WIN_SCORE);
+            saveUsers();
+            io.to('room_' + room.id).emit('scoreUpdate', {
+                [winner]: users[winner].score,
+                [username]: users[username].score
+            });
+            io.to('room_' + room.id).emit('opponentDisconnectTimeout', { username });
+            console.log(`房间 ${room.id} 对手未重连，${winner} 自动获胜 +${config.WIN_SCORE}, ${username} -${config.WIN_SCORE}`);
+        }
+    }
+    if (room.players.length === 0) {
+        resetRoom(room);
+    }
+    broadcastRooms(io);
+    if (leaverSocket && leaverSocket.connected) {
+        leaverSocket.emit('leftRoom');
+    }
+}
+
+module.exports = { startGrace, cancelGrace };

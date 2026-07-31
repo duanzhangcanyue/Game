@@ -1,5 +1,6 @@
 const { rooms, broadcastRooms, getRoomForUser, resetRoom, emitSymbols } = require('../rooms');
 const { users, saveUsers, getScore } = require('../users');
+const { startGrace, cancelGrace } = require('../grace');
 const config = require('../config');
 
 module.exports = function registerGame(io, socket) {
@@ -88,9 +89,7 @@ module.exports = function registerGame(io, socket) {
         if (!username || !room) return cb && cb({ ok: false, msg: '房间不存在' });
         if (!room.players.includes(username)) return cb && cb({ ok: false, msg: '你已不在房间中' });
         if (!room.disconnected[username]) return cb && cb({ ok: false, msg: '当前无需恢复连接' });
-        clearTimeout(room.disconnectTimers[username]);
-        delete room.disconnectTimers[username];
-        delete room.disconnected[username];
+        cancelGrace(room, username);
         socket.join('room_' + roomId);
         const symbol = room.players[0] === username ? 'black' : 'white';
         io.to('room_' + roomId).emit('playerInfo', {
@@ -106,9 +105,7 @@ module.exports = function registerGame(io, socket) {
             isMyTurn: room.turn ? room.turn === symbol : false,
             over: room.over
         });
-        if (room.turn) {
-            socket.to('room_' + roomId).emit('opponentReconnected', { username });
-        }
+        socket.to('room_' + roomId).emit('opponentReconnected', { username });
         cb && cb({ ok: true, roomId: room.id, gameType: room.gameType, symbol });
         console.log(`玩家重连成功: ${username} -> 房间 ${roomId}`);
     });
@@ -118,34 +115,7 @@ module.exports = function registerGame(io, socket) {
         if (username) {
             const room = getRoomForUser(username);
             if (room && room.players.includes(username)) {
-                room.disconnected[username] = true;
-                room.disconnectTimers[username] = setTimeout(() => {
-                    const r = getRoomForUser(username);
-                    if (!r || !r.disconnected[username]) return;
-                    delete r.disconnected[username];
-                    r.players = r.players.filter(p => p !== username);
-                    if (users[username]) {
-                        users[username].score = Math.max(0, users[username].score - config.DISCONNECT_PENALTY);
-                        saveUsers();
-                    }
-                    if (r.players.length === 1) {
-                        io.to('room_' + r.id).emit('opponentDisconnectTimeout', { username });
-                        io.to('room_' + r.id).emit('scoreUpdate', {
-                            [username]: getScore(username)
-                        });
-                        io.to('room_' + r.id).emit('playerInfo', {
-                            black: { username: r.players[0], score: getScore(r.players[0]) },
-                            white: { username: r.players[1], score: getScore(r.players[1]) }
-                        });
-                        console.log(`房间 ${r.id} 对手未重连，${username} 扣 ${config.DISCONNECT_PENALTY} 分`);
-                    }
-                    if (r.players.length === 0) {
-                        resetRoom(r);
-                    }
-                    broadcastRooms(io);
-                }, config.DISCONNECT_GRACE_MS);
-                socket.to('room_' + room.id).emit('opponentDisconnected', { username });
-                console.log(`玩家断开，10 秒内可重连: ${username} (房间 ${room.id})`);
+                startGrace(io, room, username);
             }
         }
         console.log(`连接已断开: ${socket.id}`);
