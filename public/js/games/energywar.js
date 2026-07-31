@@ -1,8 +1,23 @@
 const MAX_HP = 3;
 const MAX_ENERGY = 3;
+const ROUND_SECONDS = 10;
 const ACTION_NAMES = { gather: '聚气', block: '格挡', fire: '发射', heal: '治疗' };
 
 let ctx, mySymbol, oppSymbol, hp, energy, picks, gameActive, paused, selected, log;
+let timeLeft, countdown; 
+function startCountdown() {
+    clearInterval(countdown);
+    timeLeft = ROUND_SECONDS;
+    countdown = setInterval(() => {
+        timeLeft--;
+        if (timeLeft < 0) timeLeft = 0;
+        updateUI();
+    }, 1000);
+}
+function stopCountdown() {
+    clearInterval(countdown);
+    countdown = null;
+}
 
 function colorName(color) {
     if (!mySymbol) return color === 'black' ? '黑方' : '白方';
@@ -25,6 +40,7 @@ function eventText(ev) {
         case 'heal': return `${who} 治疗 +1血`;
         case 'healInterrupted': return `${who} 治疗被打断`;
         case 'noEnergy': return `${who} 能量不足`;
+        case 'timeout': return `${who} 超时，自动格挡`;
         default: return '';
     }
 }
@@ -66,7 +82,8 @@ function updateUI() {
         ctx.status.innerHTML = '等待对方重连（10 秒）...';
         return;
     }
-    ctx.status.innerHTML = selected ? '已选择，等待对方行动...' : '请选择你的技能';
+    const cd = timeLeft > 0 ? `（剩余 ${timeLeft} 秒）` : '';
+    ctx.status.innerHTML = selected ? `已选择，等待对方行动${cd}...` : `请选择你的技能${cd}`;
 }
 
 function pick(action) {
@@ -94,9 +111,10 @@ export default {
         gameActive = true;
         paused = false;
         render();
+        startCountdown();
         updateUI();
         ctx.restartBtn.disabled = false;
-        ctx.info.textContent = `第 ${round} 局，血量 ${MAX_HP}，能量上限 ${MAX_ENERGY}`;
+        ctx.info.textContent = `第 ${round} 局，血量 ${MAX_HP}，能量上限 ${MAX_ENERGY}，每回合 ${ROUND_SECONDS} 秒`;
     },
 
     renderWaiting(c) {
@@ -127,6 +145,7 @@ export default {
         gameActive = !data.over;
         paused = false;
         render();
+        startCountdown();
         updateUI();
         ctx.restartBtn.disabled = false;
     },
@@ -160,8 +179,10 @@ export default {
         lines.push(`你【${myPick}】 对方【${oppPick}】`);
         (data.events || []).forEach(ev => lines.push(eventText(ev)));
         ctx.status.innerHTML = lines.join('<br>');
+        if (!data.winner) startCountdown();
 
         if (data.winner) {
+            stopCountdown();
             ctx.restartBtn.disabled = false;
             if (data.winner === 'draw') {
                 ctx.status.innerHTML += '<br><b>平局！</b>';
@@ -181,6 +202,7 @@ export default {
         selected = null;
         picks = {};
         render();
+        startCountdown();
         updateUI();
     },
 

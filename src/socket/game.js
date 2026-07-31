@@ -1,6 +1,7 @@
 const { rooms, broadcastRooms, getRoomForUser, resetRoom, emitSymbols } = require('../rooms');
 const { users, saveUsers, getScore } = require('../users');
 const { startGrace, resumeIntoRoom } = require('../grace');
+const { startRoundTimer, clearRoundTimer } = require('./energy');
 const config = require('../config');
 
 module.exports = function registerGame(io, socket) {
@@ -54,6 +55,7 @@ module.exports = function registerGame(io, socket) {
             const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
             const white = black === room.players[0] ? room.players[1] : room.players[0];
             emitSymbols(io, room, black, white, room.round);
+            if (room.gameType === 'energywar') startRoundTimer(io, room);
             console.log(`房间 ${roomId} 双方同时请求，第 ${room.round} 局`);
             return;
         }
@@ -74,6 +76,7 @@ module.exports = function registerGame(io, socket) {
         const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
         const white = black === room.players[0] ? room.players[1] : room.players[0];
         emitSymbols(io, room, black, white, room.round);
+        if (room.gameType === 'energywar') startRoundTimer(io, room);
         console.log(`房间 ${roomId} 第 ${room.round} 局`);
     });
 

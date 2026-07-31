@@ -1,6 +1,7 @@
 const config = require('./config');
 const { resetRoom, broadcastRooms } = require('./rooms');
 const { users, saveUsers, getScore } = require('./users');
+const { startRoundTimer, clearRoundTimer } = require('./socket/energy');
 
 function startGrace(io, room, username, socket) {
     if (room.disconnected[username]) return;
@@ -79,6 +80,7 @@ function resumeIntoRoom(io, socket, room, username) {
     if (room.gameType === 'energywar' && room.energyState) {
         room.energyState.picks = {};
         io.to('room_' + room.id).emit('energyReset');
+        startRoundTimer(io, room);
     }
     return symbol;
 }

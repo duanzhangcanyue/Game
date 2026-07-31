@@ -42,6 +42,10 @@ function resetRoom(room) {
     for (const k in room.disconnectTimers) clearTimeout(room.disconnectTimers[k]);
     room.disconnectTimers = {};
     room.energyState = null;
+    if (room.energyTimer) {
+        clearTimeout(room.energyTimer);
+        room.energyTimer = null;
+    }
 }
 
 function emitSymbols(io, room, black, white, round) {
@@ -56,6 +60,10 @@ function startGame(io, room, getScore) {
     room.boardState = null;
     room.over = false;
     room.energyState = null;
+    if (room.energyTimer) {
+        clearTimeout(room.energyTimer);
+        room.energyTimer = null;
+    }
     const black = room.players[0];
     const white = room.players[1];
     io.to('room_' + room.id).emit('matched', { roomId: room.id, black, white, round: 1, gameType: room.gameType });

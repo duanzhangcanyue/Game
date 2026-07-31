@@ -19,9 +19,10 @@ function resolve(state) {
                 if (picks[target] === 'block') {
                     events.push({ color: c, type: 'fireBlocked', target });
                 } else {
-                    hp[target] -= 1;
+                    const dmg = picks[target] === 'heal' ? 2 : 1;
+                    hp[target] -= dmg;
                     injured[target] = true;
-                    events.push({ color: c, type: 'fire', target, dmg: 1 });
+                    events.push({ color: c, type: 'fire', target, dmg });
                 }
             } else {
                 events.push({ color: c, type: 'noEnergy' });

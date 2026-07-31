@@ -1,6 +1,7 @@
 const { rooms, roomSummary, broadcastRooms, getRoomForUser, startGame, resetRoom } = require('../rooms');
 const { getScore, listUsers } = require('../users');
 const { startGrace, resumeIntoRoom } = require('../grace');
+const { startRoundTimer } = require('./energy');
 const config = require('../config');
 
 module.exports = function registerLobby(io, socket) {
@@ -68,6 +69,7 @@ module.exports = function registerLobby(io, socket) {
         broadcastRooms(io);
         if (room.players.length === 2) {
             startGame(io, room, getScore);
+            if (room.gameType === 'energywar') startRoundTimer(io, room);
         }
         console.log(`${username} 加入房间 ${id}`);
     });
