@@ -1,6 +1,6 @@
 const MAX_HP = 3;
 const MAX_ENERGY = 3;
-const ROUND_SECONDS = 10;
+const ROUND_SECONDS = 20;
 const ACTION_NAMES = { gather: '聚气', block: '格挡', fire: '发射', heal: '治疗' };
 
 let ctx, mySymbol, oppSymbol, hp, energy, picks, gameActive, paused, selected, log;
