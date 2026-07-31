@@ -252,6 +252,8 @@ input::placeholder { color: rgba(255,255,255,0.5); }
     transition: all 0.2s; color: #f0e0c8;
 }
 .room-card:hover { border-color: #ffd9a0; transform: translateY(-2px); background: rgba(0,0,0,0.5); }
+.room-card.mine { border-color: #7bed9f; box-shadow: 0 0 8px rgba(123,237,159,0.35); }
+.room-card.mine .room-state { color: #7bed9f; font-weight: bold; }
 .room-card .room-id { font-size: 1.2rem; font-weight: bold; color: #ffd9a0; }
 .room-card .room-state { font-size: 0.8rem; color: #a9d3ff; margin-top: 0.2rem; }
 .room-card .room-players { font-size: 0.8rem; color: #f0e0c8; margin-top: 0.2rem; min-height: 1rem; }

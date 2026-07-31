@@ -1,6 +1,6 @@
 const { rooms, roomSummary, broadcastRooms, getRoomForUser, startGame, resetRoom } = require('../rooms');
 const { getScore } = require('../users');
-const { startGrace, cancelGrace } = require('../grace');
+const { startGrace, resumeIntoRoom } = require('../grace');
 const config = require('../config');
 
 module.exports = function registerLobby(io, socket) {
@@ -37,6 +37,12 @@ module.exports = function registerLobby(io, socket) {
         const id = Number(roomId);
         if (id < 1 || id > config.ROOM_COUNT) return cb && cb({ ok: false, msg: '房间号无效' });
         const room = rooms[id];
+        if (room.disconnected[username] && room.players.includes(username)) {
+            resumeIntoRoom(io, socket, room, username);
+            cb && cb({ ok: true, roomId: id, gameType: room.gameType });
+            console.log(`${username} 回归房间 ${id}`);
+            return;
+        }
         if (room.players.length >= 2) return cb && cb({ ok: false, msg: '房间已满' });
         if (room.password && room.password !== (password || '')) return cb && cb({ ok: false, msg: '房间密码错误' });
         const myRoom = getRoomForUser(username);

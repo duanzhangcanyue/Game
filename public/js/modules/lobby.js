@@ -76,14 +76,25 @@ export function renderRooms(app, rooms) {
         const room = rooms.find(r => r.id === i) || { id: i, hasPassword: false, playerCount: 0, players: [], gameType: 'erdayi' };
         const roomEmpty = room.playerCount === 0;
         const playersText = room.players && room.players.length ? room.players.join(' / ') : '空';
+        const myInRoom = app.state.myUsername && room.players && room.players.includes(app.state.myUsername);
         const card = document.createElement('div');
-        card.className = 'room-card' + (room.hasPassword ? ' locked' : '');
+        card.className = 'room-card' + (room.hasPassword ? ' locked' : '') + (myInRoom ? ' mine' : '');
         card.innerHTML = `
             <div class="room-id">房间 ${room.id}<span class="game-badge">${roomEmpty ? '空闲' : (GAME_NAMES[room.gameType] || GAME_NAMES.erdayi)}</span></div>
-            <div class="room-state">${room.playerCount}/2 ${room.playerCount === 2 ? '对局中' : (room.hasPassword ? '需密码' : '空闲')}</div>
+            <div class="room-state">${myInRoom ? '点击回归' : (room.playerCount === 2 ? '对局中' : (room.hasPassword ? '需密码' : '空闲'))}</div>
             <div class="room-players">${playersText}</div>
         `;
         card.addEventListener('click', () => {
+            if (myInRoom) {
+                document.getElementById('lobbyError').textContent = '';
+                socket.emit('resumeRoom', room.id, (res) => {
+                    if (!res || !res.ok) {
+                        document.getElementById('lobbyError').textContent = (res && res.msg) || '无法回到房间';
+                        socket.emit('getRooms');
+                    }
+                });
+                return;
+            }
             if (room.playerCount >= 2) {
                 document.getElementById('lobbyError').textContent = '该房间已满';
                 return;

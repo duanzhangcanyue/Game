@@ -1,6 +1,6 @@
 const { rooms, broadcastRooms, getRoomForUser, resetRoom, emitSymbols } = require('../rooms');
 const { users, saveUsers, getScore } = require('../users');
-const { startGrace, cancelGrace } = require('../grace');
+const { startGrace, resumeIntoRoom } = require('../grace');
 const config = require('../config');
 
 module.exports = function registerGame(io, socket) {
@@ -89,23 +89,7 @@ module.exports = function registerGame(io, socket) {
         if (!username || !room) return cb && cb({ ok: false, msg: '房间不存在' });
         if (!room.players.includes(username)) return cb && cb({ ok: false, msg: '你已不在房间中' });
         if (!room.disconnected[username]) return cb && cb({ ok: false, msg: '当前无需恢复连接' });
-        cancelGrace(room, username);
-        socket.join('room_' + roomId);
-        const symbol = room.players[0] === username ? 'black' : 'white';
-        io.to('room_' + roomId).emit('playerInfo', {
-            black: { username: room.players[0], score: getScore(room.players[0]) },
-            white: { username: room.players[1], score: getScore(room.players[1]) }
-        });
-        socket.emit('resumeGame', {
-            roomId: room.id,
-            gameType: room.gameType,
-            symbol,
-            round: room.round,
-            boardState: room.boardState,
-            isMyTurn: room.turn ? room.turn === symbol : false,
-            over: room.over
-        });
-        socket.to('room_' + roomId).emit('opponentReconnected', { username });
+        const symbol = resumeIntoRoom(io, socket, room, username);
         cb && cb({ ok: true, roomId: room.id, gameType: room.gameType, symbol });
         console.log(`玩家重连成功: ${username} -> 房间 ${roomId}`);
     });

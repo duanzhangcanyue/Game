@@ -1,6 +1,6 @@
 const config = require('./config');
 const { resetRoom, broadcastRooms } = require('./rooms');
-const { users, saveUsers } = require('./users');
+const { users, saveUsers, getScore } = require('./users');
 
 function startGrace(io, room, username, socket) {
     if (room.disconnected[username]) return;
@@ -57,4 +57,25 @@ function finishGrace(io, room, username) {
     }
 }
 
-module.exports = { startGrace, cancelGrace };
+function resumeIntoRoom(io, socket, room, username) {
+    cancelGrace(room, username);
+    socket.join('room_' + room.id);
+    const symbol = room.players[0] === username ? 'black' : 'white';
+    io.to('room_' + room.id).emit('playerInfo', {
+        black: { username: room.players[0], score: getScore(room.players[0]) },
+        white: { username: room.players[1], score: getScore(room.players[1]) }
+    });
+    socket.emit('resumeGame', {
+        roomId: room.id,
+        gameType: room.gameType,
+        symbol,
+        round: room.round,
+        boardState: room.boardState,
+        isMyTurn: room.turn ? room.turn === symbol : false,
+        over: room.over
+    });
+    socket.to('room_' + room.id).emit('opponentReconnected', { username });
+    return symbol;
+}
+
+module.exports = { startGrace, cancelGrace, resumeIntoRoom };
