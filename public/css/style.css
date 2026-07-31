@@ -256,6 +256,9 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 .room-card.mine .room-state { color: #7bed9f; font-weight: bold; }
 .room-card .room-id { font-size: 1.2rem; font-weight: bold; color: #ffd9a0; }
 .room-card .room-state { font-size: 0.8rem; color: #a9d3ff; margin-top: 0.2rem; }
+.room-card .room-state.state-waiting { color: #ffd76a; font-weight: bold; }
+.room-card .room-state.state-playing { color: #ff6b6b; font-weight: bold; }
+.room-card .room-state.state-mine { color: #7bed9f; font-weight: bold; }
 .room-card .room-players { font-size: 0.8rem; color: #f0e0c8; margin-top: 0.2rem; min-height: 1rem; }
 .room-card.locked .room-id::after { content: ' 🔒'; font-size: 0.8rem; }
 .lobby-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }

@@ -75,13 +75,20 @@ export function renderRooms(app, rooms) {
     for (let i = 1; i <= 10; i++) {
         const room = rooms.find(r => r.id === i) || { id: i, hasPassword: false, playerCount: 0, players: [], gameType: 'erdayi' };
         const roomEmpty = room.playerCount === 0;
+        const roomWaiting = room.playerCount === 1;
+        const roomPlaying = room.playerCount === 2;
         const playersText = room.players && room.players.length ? room.players.join(' / ') : '空';
         const myInRoom = app.state.myUsername && room.players && room.players.includes(app.state.myUsername);
+        let stateClass = 'state-empty', stateText = '空闲';
+        if (myInRoom) { stateClass = 'state-mine'; stateText = '点击回归'; }
+        else if (roomPlaying) { stateClass = 'state-playing'; stateText = '游戏中'; }
+        else if (roomWaiting) { stateClass = 'state-waiting'; stateText = '等待中'; }
+        else if (room.hasPassword) { stateClass = 'state-empty'; stateText = '需密码'; }
         const card = document.createElement('div');
         card.className = 'room-card' + (room.hasPassword ? ' locked' : '') + (myInRoom ? ' mine' : '');
         card.innerHTML = `
             <div class="room-id">房间 ${room.id}<span class="game-badge">${roomEmpty ? '空闲' : (GAME_NAMES[room.gameType] || GAME_NAMES.erdayi)}</span></div>
-            <div class="room-state">${myInRoom ? '点击回归' : (room.playerCount === 2 ? '对局中' : (room.hasPassword ? '需密码' : '空闲'))}</div>
+            <div class="room-state ${stateClass}">${stateText}</div>
             <div class="room-players">${playersText}</div>
         `;
         card.addEventListener('click', () => {
