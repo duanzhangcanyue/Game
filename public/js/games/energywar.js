@@ -115,19 +115,19 @@ function addFx(el, ms) {
 function fxGather(color) {
     const c = fxCenter(color);
     if (!c) return;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
         const s = document.createElement('div');
         s.className = 'ew-fx-spark gather';
-        const ang = (i / 6) * Math.PI * 2;
-        const rad = 46;
+        const ang = (i / 8) * Math.PI * 2;
+        const rad = 52;
         const sx = c.x + Math.cos(ang) * rad;
         const sy = c.y + Math.sin(ang) * rad;
         s.style.left = sx + 'px';
         s.style.top = sy + 'px';
         s.style.setProperty('--tx', (c.x - sx) + 'px');
         s.style.setProperty('--ty', (c.y - sy) + 'px');
-        s.style.animationDelay = (i * 0.07) + 's';
-        addFx(s, 1300);
+        s.style.animationDelay = (i * 0.12) + 's';
+        addFx(s, 1800);
     }
 }
 
@@ -135,19 +135,19 @@ function fxHeal(color) {
     const p = fxPanel(color);
     if (!p) return;
     const c = fxCenter(color);
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
         const s = document.createElement('div');
         s.className = 'ew-fx-spark heal';
-        s.style.left = (c.x + (Math.random() * 44 - 22)) + 'px';
-        s.style.top = (c.y + (Math.random() * 24 - 12)) + 'px';
-        s.style.setProperty('--drift', (Math.random() * 34 - 17) + 'px');
-        s.style.animationDelay = (i * 0.09) + 's';
-        addFx(s, 1500);
+        s.style.left = (c.x + (Math.random() * 50 - 25)) + 'px';
+        s.style.top = (c.y + (Math.random() * 30 - 15)) + 'px';
+        s.style.setProperty('--drift', (Math.random() * 40 - 20) + 'px');
+        s.style.animationDelay = (i * 0.12) + 's';
+        addFx(s, 2000);
     }
     const glow = document.createElement('div');
     glow.className = 'ew-fx-healglow';
     p.appendChild(glow);
-    setTimeout(() => glow.remove(), 1000);
+    setTimeout(() => glow.remove(), 1600);
 }
 
 function fxFire(from, to) {
@@ -159,8 +159,34 @@ function fxFire(from, to) {
     bolt.style.top = a.y + 'px';
     bolt.style.setProperty('--dx', (b.x - a.x) + 'px');
     bolt.style.setProperty('--dy', (b.y - a.y) + 'px');
-    addFx(bolt, 700);
-    setTimeout(() => fxImpact(to), 380);
+    addFx(bolt, 900);
+    setTimeout(() => fxImpact(to), 560);
+}
+
+function fxFireBlocked(from, to) {
+    const a = fxCenter(from), b = fxCenter(to);
+    if (!a || !b) return;
+    const dx = (b.x - a.x) * 0.72;
+    const dy = (b.y - a.y) * 0.72;
+    const bolt = document.createElement('div');
+    bolt.className = 'ew-fx-bolt';
+    bolt.style.left = a.x + 'px';
+    bolt.style.top = a.y + 'px';
+    bolt.style.setProperty('--dx', dx + 'px');
+    bolt.style.setProperty('--dy', dy + 'px');
+    addFx(bolt, 800);
+    setTimeout(() => {
+        const shield = document.createElement('div');
+        shield.className = 'ew-fx-shield';
+        shield.style.left = (a.x + dx) + 'px';
+        shield.style.top = (a.y + dy) + 'px';
+        addFx(shield, 1100);
+        const spark = document.createElement('div');
+        spark.className = 'ew-fx-impact';
+        spark.style.left = (a.x + dx) + 'px';
+        spark.style.top = (a.y + dy) + 'px';
+        addFx(spark, 700);
+    }, 520);
 }
 
 function fxImpact(color) {
@@ -170,7 +196,7 @@ function fxImpact(color) {
     el.className = 'ew-fx-impact';
     el.style.left = c.x + 'px';
     el.style.top = c.y + 'px';
-    addFx(el, 700);
+    addFx(el, 900);
 }
 
 function fxBurst(color) {
@@ -180,7 +206,7 @@ function fxBurst(color) {
     el.className = 'ew-fx-burst';
     el.style.left = c.x + 'px';
     el.style.top = c.y + 'px';
-    addFx(el, 800);
+    addFx(el, 1000);
 }
 
 function fxShield(color) {
@@ -190,7 +216,7 @@ function fxShield(color) {
     el.className = 'ew-fx-shield';
     el.style.left = c.x + 'px';
     el.style.top = c.y + 'px';
-    addFx(el, 900);
+    addFx(el, 1100);
 }
 
 function fxInterrupted(color) {
@@ -205,7 +231,7 @@ function fxInterrupted(color) {
     setTimeout(() => {
         flash.remove();
         p.classList.remove('ew-shake');
-    }, 800);
+    }, 1100);
 }
 
 function fxTimeout(color) {
@@ -216,7 +242,7 @@ function fxTimeout(color) {
     el.style.left = c.x + 'px';
     el.style.top = c.y + 'px';
     el.textContent = '超时';
-    addFx(el, 1200);
+    addFx(el, 1500);
 }
 
 function playEffects(events) {
@@ -225,7 +251,7 @@ function playEffects(events) {
             case 'gather': fxGather(ev.color); break;
             case 'heal': fxHeal(ev.color); break;
             case 'fire': fxFire(ev.color, ev.target); break;
-            case 'fireBlocked': fxShield(ev.target); break;
+            case 'fireBlocked': fxFireBlocked(ev.color, ev.target); break;
             case 'burst': fxBurst(ev.target); break;
             case 'gatherInterrupted':
             case 'healInterrupted': fxInterrupted(ev.color); break;
