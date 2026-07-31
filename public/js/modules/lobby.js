@@ -73,13 +73,15 @@ export function renderRooms(app, rooms) {
     const socket = app.socket;
     grid.innerHTML = '';
     for (let i = 1; i <= 10; i++) {
-        const room = rooms.find(r => r.id === i) || { id: i, hasPassword: false, playerCount: 0, players: [] };
+        const room = rooms.find(r => r.id === i) || { id: i, hasPassword: false, playerCount: 0, players: [], gameType: 'erdayi' };
         const roomEmpty = room.playerCount === 0;
+        const playersText = room.players && room.players.length ? room.players.join(' / ') : '空';
         const card = document.createElement('div');
         card.className = 'room-card' + (room.hasPassword ? ' locked' : '');
         card.innerHTML = `
             <div class="room-id">房间 ${room.id}<span class="game-badge">${roomEmpty ? '空闲' : (GAME_NAMES[room.gameType] || GAME_NAMES.erdayi)}</span></div>
             <div class="room-state">${room.playerCount}/2 ${room.playerCount === 2 ? '对局中' : (room.hasPassword ? '需密码' : '空闲')}</div>
+            <div class="room-players">${playersText}</div>
         `;
         card.addEventListener('click', () => {
             if (room.playerCount >= 2) {

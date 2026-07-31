@@ -225,6 +225,13 @@ socket.on('opponentLeft', () => {
     els.info.textContent = '等待新对手加入...';
     els.restartBtn.disabled = true;
     els.restartConfirm.style.display = 'none';
+    const mine = els.playerBlack.classList.contains('me') ? els.playerBlack : els.playerWhite;
+    const other = mine === els.playerBlack ? els.playerWhite : els.playerBlack;
+    other.querySelector('.player-name').textContent = '';
+    other.querySelector('.player-score').textContent = '';
+    const sym = other.querySelector('.player-sym');
+    sym.className = 'player-sym';
+    sym.textContent = '';
 });
 
 socket.on('leftRoom', () => {
