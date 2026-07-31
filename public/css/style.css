@@ -90,7 +90,8 @@ h1 {
 }
 .board-gomoku .stone.black { background-image: radial-gradient(circle at 35% 35%, #666, #000); }
 .board-gomoku .stone.white { background-image: radial-gradient(circle at 35% 35%, #fff, #ccc); }
-.board-gomoku .tt-win { background: rgba(231, 76, 60, 0.35) !important; box-shadow: inset 0 0 20px rgba(231, 76, 60, 0.5); }
+.board-gomoku .cell.hint::after, .board-gomoku .gomoku-cell.hint::before { box-shadow: none; background: none; }
+.board-gomoku .cell.tt-win { background: rgba(231, 76, 60, 0.35) !important; box-shadow: inset 0 0 20px rgba(231, 76, 60, 0.5); }
 .board-gomoku .gomoku-cell.selected { background: rgba(52, 152, 219, 0.2); border-radius: 4px; }
 
 /* 井字棋：原版浅色格子，红叉蓝圈 */
@@ -269,6 +270,15 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 }
 .black-sym { background-image: url('../stone-black.png'), radial-gradient(circle, #666, #000); }
 .white-sym { background-image: url('../stone-white.png'), radial-gradient(circle, #fff, #ccc); }
+.sym-black { background-image: radial-gradient(circle at 35% 35%, #666, #000); }
+.sym-white { background-image: radial-gradient(circle at 35% 35%, #fff, #ccc); }
+.sym-x, .sym-o {
+    display: flex; align-items: center; justify-content: center;
+    background: #f0f0f0; font-weight: bold; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.sym-x { color: #e74c3c; }
+.sym-o { color: #3498db; }
 .player-name { font-size: 0.95rem; color: #ffd9a0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-score { font-size: 0.8rem; color: #a9d3ff; }
 .vs-text { font-size: 1.2rem; font-weight: bold; color: #ff5e3a; text-shadow: 0 0 8px rgba(255,90,40,0.6); }

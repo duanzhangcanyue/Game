@@ -59,6 +59,7 @@ async function loadGame(gameType) {
 function enterGame(roomId, gameType, isCreator) {
     state.roomId = roomId;
     state.gameType = gameType;
+    setPlayerSyms();
     showView('game');
     els.restartConfirm.style.display = 'none';
     loadGame(gameType).then((game) => {
@@ -71,6 +72,26 @@ function enterGame(roomId, gameType, isCreator) {
 }
 
 /* ---------- 玩家栏 ---------- */
+function setPlayerSyms() {
+    const g = state.gameType || 'erdayi';
+    const b = els.playerBlack.querySelector('.player-sym');
+    const w = els.playerWhite.querySelector('.player-sym');
+    b.className = 'player-sym';
+    w.className = 'player-sym';
+    b.textContent = '';
+    w.textContent = '';
+    if (g === 'tictactoe') {
+        b.textContent = 'X'; b.classList.add('sym-x');
+        w.textContent = 'O'; w.classList.add('sym-o');
+    } else if (g === 'gomoku') {
+        b.classList.add('sym-black');
+        w.classList.add('sym-white');
+    } else {
+        b.classList.add('black-sym');
+        w.classList.add('white-sym');
+    }
+}
+
 function setWaitingPlayer(color, name, score) {
     const card = color === 'black' ? els.playerBlack : els.playerWhite;
     card.querySelector('.player-name').textContent = name;
@@ -79,6 +100,7 @@ function setWaitingPlayer(color, name, score) {
 }
 
 function updatePlayersBar(info) {
+    setPlayerSyms();
     const black = els.playerBlack;
     const white = els.playerWhite;
     black.querySelector('.player-name').textContent = info.black.username;
