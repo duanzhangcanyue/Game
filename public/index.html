@@ -35,6 +35,7 @@
             <div class="lobby-top">
                 <span class="info">玩家: <span id="lobbyUser"></span></span>
                 <span class="score-badge">积分: <span id="lobbyScore"></span></span>
+                <button class="small secondary" id="adminBtn" style="display:none;">用户管理</button>
             </div>
             <div class="status" id="lobbyStatus"></div>
             <div class="room-grid" id="roomGrid"></div>
@@ -92,6 +93,29 @@
                 <button id="acceptBtn">同意</button>
                 <button id="rejectBtn">拒绝</button>
             </div>
+        </div>
+
+        <!-- 用户管理(GM) -->
+        <div class="view" id="adminView">
+            <div class="lobby-top">
+                <h2 style="margin:0;">用户管理</h2>
+                <button class="small secondary" id="adminBackBtn">返回大厅</button>
+            </div>
+            <div class="info" id="adminInfo"></div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>密码</th>
+                            <th>积分</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTbody"></tbody>
+                </table>
+            </div>
+            <div class="error-msg" id="adminError"></div>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>

@@ -289,3 +289,19 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 .player-score { font-size: 0.8rem; color: #a9d3ff; }
 .vs-text { font-size: 1.2rem; font-weight: bold; color: #ff5e3a; text-shadow: 0 0 8px rgba(255,90,40,0.6); }
 .player-card.me .player-name::after { content: '（你）'; font-size: 0.7rem; color: #7bed9f; }
+
+.admin-table-wrap {
+    max-height: 60vh; overflow-y: auto; margin-top: 0.5rem;
+    background: rgba(0,0,0,0.35); border-radius: 10px;
+    border: 1px solid rgba(255,220,160,0.2);
+}
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.admin-table th, .admin-table td {
+    padding: 8px 10px; border-bottom: 1px solid rgba(255,220,160,0.12);
+    text-align: left; color: #f0e0c8;
+}
+.admin-table th { color: #ffd9a0; position: sticky; top: 0; background: rgba(20,16,40,0.95); }
+.admin-table .admin-pwd { font-family: Consolas, monospace; color: #a9d3ff; word-break: break-all; }
+.admin-table .admin-actions { white-space: nowrap; }
+.admin-table button.small { padding: 5px 10px; font-size: 0.78rem; margin-right: 4px; }
+.admin-table button.danger { background: linear-gradient(135deg, #e05656, #c0392b); }

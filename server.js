@@ -2,9 +2,13 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const config = require('./src/config');
+const { ensureGM } = require('./src/users');
 const registerAuth = require('./src/socket/auth');
 const registerLobby = require('./src/socket/lobby');
 const registerGame = require('./src/socket/game');
+const registerAdmin = require('./src/socket/admin');
+
+ensureGM();
 
 const app = express();
 const server = http.createServer(app);
@@ -17,6 +21,7 @@ io.on('connection', (socket) => {
     registerAuth(io, socket);
     registerLobby(io, socket);
     registerGame(io, socket);
+    registerAdmin(io, socket);
 });
 
 server.listen(config.PORT, () => {

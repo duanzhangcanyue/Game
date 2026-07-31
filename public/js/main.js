@@ -1,12 +1,19 @@
 import * as auth from './modules/auth.js';
 import * as lobby from './modules/lobby.js';
 
+const GM_USERNAME = '咪路';
 const socket = io();
 
 const els = {
     authView: document.getElementById('authView'),
     lobbyView: document.getElementById('lobbyView'),
     gameView: document.getElementById('gameView'),
+    adminView: document.getElementById('adminView'),
+    adminBtn: document.getElementById('adminBtn'),
+    adminBackBtn: document.getElementById('adminBackBtn'),
+    adminInfo: document.getElementById('adminInfo'),
+    adminTbody: document.getElementById('adminTbody'),
+    adminError: document.getElementById('adminError'),
     board: document.getElementById('board'),
     status: document.getElementById('status'),
     info: document.getElementById('info'),
@@ -33,7 +40,7 @@ const state = {
 
 const app = { socket, els, state };
 
-const views = { auth: els.authView, lobby: els.lobbyView, game: els.gameView };
+const views = { auth: els.authView, lobby: els.lobbyView, game: els.gameView, admin: els.adminView };
 function showView(name) {
     for (const k in views) views[k].classList.toggle('active', k === name);
 }
@@ -124,6 +131,7 @@ function onAuthSuccess(username, score) {
     state.myScore = score;
     els.lobbyUser.textContent = username;
     els.lobbyScore.textContent = score;
+    els.adminBtn.style.display = (username === GM_USERNAME) ? 'inline-block' : 'none';
     showView('lobby');
     socket.emit('getRooms');
 }
@@ -240,6 +248,86 @@ socket.on('leftRoom', () => {
     resetPlayersBar();
     showView('lobby');
     socket.emit('getRooms');
+});
+
+/* ---------- 用户管理(GM) ---------- */
+let adminUsers = [];
+
+function loadAdminUsers() {
+    socket.emit('adminListUsers', (res) => {
+        if (res.ok) {
+            adminUsers = res.users;
+            renderAdminTable();
+        } else {
+            els.adminError.textContent = res.msg;
+        }
+    });
+}
+
+function renderAdminTable() {
+    els.adminTbody.innerHTML = '';
+    if (!adminUsers.length) {
+        els.adminTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a9d3ff;">暂无用户</td></tr>';
+        return;
+    }
+    adminUsers.forEach((u) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(u.username)}${u.gm ? ' <span class="game-badge">GM</span>' : ''}</td>
+            <td class="admin-pwd">${escapeHtml(u.password)}</td>
+            <td>${u.score}</td>
+            <td class="admin-actions">
+                <button class="small" data-action="pwd" data-user="${escapeHtml(u.username)}">改密</button>
+                <button class="small" data-action="score" data-user="${escapeHtml(u.username)}">改分</button>
+                <button class="small danger" data-action="del" data-user="${escapeHtml(u.username)}">删除</button>
+            </td>
+        `;
+        els.adminTbody.appendChild(tr);
+    });
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+els.adminBtn.addEventListener('click', () => {
+    showView('admin');
+    els.adminInfo.textContent = '共 ' + adminUsers.length + ' 位用户';
+    els.adminError.textContent = '';
+    loadAdminUsers();
+});
+
+els.adminBackBtn.addEventListener('click', () => {
+    showView('lobby');
+});
+
+els.adminTbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const user = btn.dataset.user;
+    const action = btn.dataset.action;
+    if (action === 'pwd') {
+        const pwd = prompt('为用户 ' + user + ' 设置新密码：');
+        if (pwd === null) return;
+        if (!pwd) { els.adminError.textContent = '密码不能为空'; return; }
+        socket.emit('adminSetPassword', { username: user, password: pwd }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    } else if (action === 'score') {
+        const score = prompt('为用户 ' + user + ' 设置新积分：');
+        if (score === null) return;
+        socket.emit('adminSetScore', { username: user, score }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    } else if (action === 'del') {
+        if (!confirm('确定删除用户 ' + user + ' 吗？')) return;
+        socket.emit('adminDeleteUser', { username: user }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    }
 });
 
 showView('auth');
