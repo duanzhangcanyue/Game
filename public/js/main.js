@@ -2,7 +2,9 @@ import * as auth from './modules/auth.js';
 import * as lobby from './modules/lobby.js';
 
 const GM_USERNAME = '咪路';
+const APP_TITLE = '咪路游戏大厅';
 const socket = io();
+document.title = APP_TITLE;
 
 const els = {
     authView: document.getElementById('authView'),
