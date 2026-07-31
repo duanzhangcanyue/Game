@@ -33,7 +33,7 @@ h1 {
     grid-template-columns: repeat(var(--n, 4), 1fr);
     grid-template-rows: repeat(var(--n, 4), 1fr);
     gap: 0; margin: 0 auto 1.5rem;
-    width: min(540px, calc(100vw - 44px));
+    width: min(540px, 100%);
     position: relative;
     background-color: #a8966f;
     background-image:
@@ -323,7 +323,7 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 /* 能量战 */
 .ew-board {
     display: block;
-    width: min(540px, calc(100vw - 44px));
+    width: min(540px, 100%);
     margin: 0 auto 1.5rem;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 220, 160, 0.25);
@@ -366,3 +366,36 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 }
 .ew-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .ew-btn:disabled:hover { background: rgba(0, 0, 0, 0.35); border-color: rgba(255, 220, 160, 0.25); }
+
+/* 手机端 */
+@media (max-width: 520px) {
+    .container {
+        width: calc(100vw - 12px);
+        padding: 1rem 0.6rem;
+        border-radius: 10px;
+    }
+    .board { width: 100%; }
+    .ew-board { width: 100%; padding: 0.6rem; }
+    .ew-panels { flex-direction: column; gap: 0.4rem; }
+    .ew-vs { display: none; }
+    .ew-panel { padding: 0.5rem; }
+    .ew-name { font-size: 0.85rem; }
+    .ew-label { min-width: 1.4rem; font-size: 0.65rem; }
+    .ew-heart { width: 20px; height: 20px; margin-right: 3px; }
+    .ew-seg { width: 24px; height: 12px; margin-right: 3px; }
+    .ew-actions { gap: 0.35rem; }
+    .ew-btn { padding: 10px 2px; font-size: 0.9rem; }
+    .ew-btn small { font-size: 0.62rem; }
+    .players-bar { gap: 0.3rem; padding: 0.4rem; }
+    .player-sym { width: 22px; height: 22px; }
+    .player-name { font-size: 0.85rem; }
+    .player-score { font-size: 0.7rem; }
+    .vs-text { font-size: 1rem; }
+    h1 { font-size: 1.6rem; }
+    .status { font-size: 1.05rem; }
+    button { padding: 10px 20px; font-size: 0.95rem; }
+    .game-select { flex-wrap: wrap; }
+    .game-select button { flex: 1 1 40%; }
+    .admin-table th, .admin-table td { padding: 6px 6px; font-size: 0.78rem; }
+    .room-card .room-id { font-size: 1.05rem; }
+}

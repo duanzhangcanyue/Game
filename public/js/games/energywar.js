@@ -18,10 +18,12 @@ function eventText(ev) {
     const who = persp(ev.color);
     switch (ev.type) {
         case 'gather': return `${who} 聚气 +1能量`;
+        case 'gatherInterrupted': return `${who} 聚气被打断`;
         case 'burst': return `${who} 能量爆发！${persp(ev.target)} -${ev.dmg}`;
         case 'fire': return `${who} 发射，${persp(ev.target)} -${ev.dmg}`;
         case 'fireBlocked': return `${who} 发射被格挡`;
         case 'heal': return `${who} 治疗 +1血`;
+        case 'healInterrupted': return `${who} 治疗被打断`;
         case 'noEnergy': return `${who} 能量不足`;
         default: return '';
     }

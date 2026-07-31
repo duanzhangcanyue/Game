@@ -9,22 +9,7 @@ function resolve(state) {
     const { hp, energy, picks } = state;
     const events = [];
     const colors = ['black', 'white'];
-
-    for (const c of colors) {
-        if (picks[c] === 'gather') {
-            energy[c] = Math.min(MAX_ENERGY, energy[c] + 1);
-            events.push({ color: c, type: 'gather' });
-        }
-    }
-
-    for (const c of colors) {
-        if (energy[c] >= MAX_ENERGY) {
-            energy[c] = 0;
-            const target = c === 'black' ? 'white' : 'black';
-            hp[target] -= 2;
-            events.push({ color: c, type: 'burst', target, dmg: 2 });
-        }
-    }
+    const injured = { black: false, white: false };
 
     for (const c of colors) {
         const target = c === 'black' ? 'white' : 'black';
@@ -35,13 +20,41 @@ function resolve(state) {
                     events.push({ color: c, type: 'fireBlocked', target });
                 } else {
                     hp[target] -= 1;
+                    injured[target] = true;
                     events.push({ color: c, type: 'fire', target, dmg: 1 });
                 }
             } else {
                 events.push({ color: c, type: 'noEnergy' });
             }
-        } else if (picks[c] === 'heal') {
-            if (energy[c] >= 1) {
+        }
+    }
+
+    for (const c of colors) {
+        if (picks[c] === 'gather') {
+            if (injured[c]) {
+                events.push({ color: c, type: 'gatherInterrupted' });
+            } else {
+                energy[c] = Math.min(MAX_ENERGY, energy[c] + 1);
+                events.push({ color: c, type: 'gather' });
+            }
+        }
+    }
+
+    for (const c of colors) {
+        if (energy[c] >= MAX_ENERGY) {
+            energy[c] = 0;
+            const target = c === 'black' ? 'white' : 'black';
+            hp[target] -= 2;
+            injured[target] = true;
+            events.push({ color: c, type: 'burst', target, dmg: 2 });
+        }
+    }
+
+    for (const c of colors) {
+        if (picks[c] === 'heal') {
+            if (injured[c]) {
+                events.push({ color: c, type: 'healInterrupted' });
+            } else if (energy[c] >= 1) {
                 energy[c] -= 1;
                 hp[c] = Math.min(MAX_HP, hp[c] + 1);
                 events.push({ color: c, type: 'heal' });
