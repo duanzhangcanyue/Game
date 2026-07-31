@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线游戏大厅</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="appTitle">游戏大厅</h1>
+
+        <!-- 个人账户 -->
+        <div class="view active" id="authView">
+            <div class="auth-box">
+                <div class="info">登录后进入游戏大厅</div>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUser" placeholder="2-16位，不能重复">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPass" placeholder="请输入密码">
+                </div>
+                <div class="error-msg" id="authError"></div>
+                <div style="display:flex; gap:0.8rem; justify-content:center; margin-top:0.5rem;">
+                    <button class="secondary" id="loginBtn">登录</button>
+                    <button id="registerBtn">注册</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏大厅 -->
+        <div class="view" id="lobbyView">
+            <div class="lobby-top">
+                <span class="info">玩家: <span id="lobbyUser"></span></span>
+                <span class="score-badge">积分: <span id="lobbyScore"></span></span>
+            </div>
+            <div class="status" id="lobbyStatus"></div>
+            <div class="room-grid" id="roomGrid"></div>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;">
+                <label>创建房间</label>
+                <div class="game-select" id="gameSelect">
+                    <button type="button" data-game="erdayi" class="active">二打一</button>
+                    <button type="button" data-game="gomoku">五子棋</button>
+                    <button type="button" data-game="tictactoe">井字棋</button>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                    <input type="number" id="newRoomId" min="1" max="10" placeholder="房间号1-10" style="width:100px;">
+                    <input type="password" id="newRoomPwd" placeholder="密码(可留空)">
+                </div>
+                <button id="createRoomBtn" style="width:100%; margin-top:0.5rem;">创建房间</button>
+            </div>
+            <div class="error-msg" id="lobbyError"></div>
+            <div id="pwdPanel" style="display:none; margin-top: 0.8rem; max-width: 320px; margin-left: auto; margin-right: auto;">
+                <div class="form-group">
+                    <label>房间 <span id="pwdRoomId"></span> 密码</label>
+                    <input type="password" id="pwdInput" placeholder="请输入房间密码">
+                </div>
+                <div style="display:flex; gap:0.8rem; justify-content:center;">
+                    <button class="small" id="pwdOkBtn">确认加入</button>
+                    <button class="small secondary" id="pwdCancelBtn">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对局 -->
+        <div class="view" id="gameView">
+            <div class="players-bar" id="playersBar">
+                <div class="player-card" id="playerBlack">
+                    <div class="player-sym black-sym"></div>
+                    <div class="player-name">等待中</div>
+                    <div class="player-score">--</div>
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="player-card" id="playerWhite">
+                    <div class="player-sym white-sym"></div>
+                    <div class="player-name">等待中</div>
+                    <div class="player-score">--</div>
+                </div>
+            </div>
+            <div class="info" id="info">正在连接服务器...</div>
+            <div class="status" id="status"></div>
+            <div class="board" id="board"></div>
+            <div class="info" id="countInfo"></div>
+            <div class="game-buttons">
+                <button id="restart" disabled>重新开始</button>
+                <button class="secondary" id="leaveRoomBtn">离开房间</button>
+            </div>
+            <div id="restartConfirm" style="display:none; margin-top: 0.75rem;">
+                <div class="info">对方请求重新开始，是否同意？</div>
+                <button id="acceptBtn">同意</button>
+                <button id="rejectBtn">拒绝</button>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
