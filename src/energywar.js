@@ -55,12 +55,9 @@ function resolve(state) {
         if (picks[c] === 'heal') {
             if (injured[c]) {
                 events.push({ color: c, type: 'healInterrupted' });
-            } else if (energy[c] >= 1) {
-                energy[c] -= 1;
+            } else {
                 hp[c] = Math.min(MAX_HP, hp[c] + 1);
                 events.push({ color: c, type: 'heal' });
-            } else {
-                events.push({ color: c, type: 'noEnergy' });
             }
         }
     }

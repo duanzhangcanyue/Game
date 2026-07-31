@@ -64,9 +64,9 @@ function render() {
         ['gather', '聚气', '+1能量'],
         ['block', '格挡', '挡发射'],
         ['fire', '发射', '耗1能量'],
-        ['heal', '治疗', '耗1能量']
+        ['heal', '治疗', '不耗能量']
     ].map(([a, name, tip]) => {
-        const disabled = !gameActive || paused || selected || ((a === 'fire' || a === 'heal') && energy[mySymbol] < 1);
+        const disabled = !gameActive || paused || selected || (a === 'fire' && energy[mySymbol] < 1);
         const sel = selected === a ? ' selected' : '';
         return `<button class="ew-btn${sel}" data-action="${a}" ${disabled ? 'disabled' : ''}>${name}<small>${tip}</small></button>`;
     }).join('');
@@ -88,7 +88,7 @@ function updateUI() {
 
 function pick(action) {
     if (!gameActive || paused || selected) return;
-    if ((action === 'fire' || action === 'heal') && energy[mySymbol] < 1) return;
+    if (action === 'fire' && energy[mySymbol] < 1) return;
     selected = action;
     ctx.socket.emit('energyPick', { roomId: ctx.getRoomId(), action });
     render();

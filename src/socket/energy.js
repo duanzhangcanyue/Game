@@ -99,7 +99,7 @@ module.exports = function registerEnergy(io, socket) {
         const action = data.action;
         if (!VALID_ACTIONS.includes(action)) return;
         if (st.picks[symbol]) return;
-        if ((action === 'fire' || action === 'heal') && st.energy[symbol] < 1) return;
+        if ((action === 'fire') && st.energy[symbol] < 1) return;
         st.picks[symbol] = action;
         if (Object.keys(st.picks).length < 2) return;
         resolveRound(io, room);
