@@ -1,4 +1,4 @@
-const GAME_NAMES = { erdayi: '二打一', gomoku: '五子棋', tictactoe: '井字棋' };
+const GAME_NAMES = { erdayi: '二打一', gomoku: '五子棋', tictactoe: '井字棋', energywar: '能量战' };
 
 let pendingJoin = null;
 let enterGame = null;

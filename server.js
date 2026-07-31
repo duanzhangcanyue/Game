@@ -6,6 +6,7 @@ const { ensureGM } = require('./src/users');
 const registerAuth = require('./src/socket/auth');
 const registerLobby = require('./src/socket/lobby');
 const registerGame = require('./src/socket/game');
+const registerEnergy = require('./src/socket/energy');
 const registerAdmin = require('./src/socket/admin');
 
 ensureGM();
@@ -21,6 +22,7 @@ io.on('connection', (socket) => {
     registerAuth(io, socket);
     registerLobby(io, socket);
     registerGame(io, socket);
+    registerEnergy(io, socket);
     registerAdmin(io, socket);
 });
 

@@ -2,7 +2,7 @@ const config = require('./config');
 
 const rooms = {};
 for (let i = 1; i <= config.ROOM_COUNT; i++) {
-    rooms[i] = { id: i, password: '', players: [], round: 1, pendingRestart: false, gameType: 'erdayi', turn: null, boardState: null, over: false, disconnected: {}, disconnectTimers: {} };
+    rooms[i] = { id: i, password: '', players: [], round: 1, pendingRestart: false, gameType: 'erdayi', turn: null, boardState: null, over: false, disconnected: {}, disconnectTimers: {}, energyState: null };
 }
 
 function roomSummary() {
@@ -41,6 +41,7 @@ function resetRoom(room) {
     room.disconnected = {};
     for (const k in room.disconnectTimers) clearTimeout(room.disconnectTimers[k]);
     room.disconnectTimers = {};
+    room.energyState = null;
 }
 
 function emitSymbols(io, room, black, white, round) {
@@ -54,6 +55,7 @@ function startGame(io, room, getScore) {
     room.turn = 'black';
     room.boardState = null;
     room.over = false;
+    room.energyState = null;
     const black = room.players[0];
     const white = room.players[1];
     io.to('room_' + room.id).emit('matched', { roomId: room.id, black, white, round: 1, gameType: room.gameType });

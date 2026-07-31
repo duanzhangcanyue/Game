@@ -319,3 +319,50 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 .admin-table .admin-actions { white-space: nowrap; }
 .admin-table button.small { padding: 5px 10px; font-size: 0.78rem; margin-right: 4px; }
 .admin-table button.danger { background: linear-gradient(135deg, #e05656, #c0392b); }
+
+/* 能量战 */
+.ew-board {
+    display: block;
+    width: min(540px, calc(100vw - 44px));
+    margin: 0 auto 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 220, 160, 0.25);
+    border-radius: 12px;
+    padding: 1rem;
+}
+.ew-panels { display: flex; justify-content: space-between; align-items: stretch; gap: 0.6rem; margin-bottom: 1rem; }
+.ew-panel {
+    flex: 1; background: rgba(0, 0, 0, 0.35); border-radius: 10px;
+    border: 1px solid rgba(255, 220, 160, 0.2); padding: 0.7rem;
+}
+.ew-panel.me { border-color: #7bed9f; box-shadow: 0 0 8px rgba(123, 237, 159, 0.35); }
+.ew-name { color: #ffd9a0; font-weight: bold; font-size: 0.95rem; margin-bottom: 0.5rem; }
+.ew-label { font-size: 0.72rem; color: #a9d3ff; margin-right: 0.4rem; min-width: 2rem; text-align: left; }
+.ew-hp-row, .ew-en-row { display: flex; align-items: center; margin-bottom: 0.4rem; }
+.ew-heart {
+    width: 22px; height: 22px; margin-right: 4px; border-radius: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 220, 160, 0.25);
+}
+.ew-heart.on { background: linear-gradient(135deg, #ff5e5e, #c0392b); box-shadow: 0 0 8px rgba(255, 60, 60, 0.5); }
+.ew-seg {
+    width: 34px; height: 14px; margin-right: 4px; border-radius: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 220, 160, 0.25);
+}
+.ew-seg.on { background: linear-gradient(135deg, #4a9eff, #2a6bff); box-shadow: 0 0 8px rgba(70, 140, 255, 0.5); }
+.ew-vs { display: flex; align-items: center; font-weight: bold; color: #ff5e3a; text-shadow: 0 0 8px rgba(255, 90, 40, 0.6); }
+.ew-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.ew-btn {
+    padding: 10px 4px; font-size: 0.95rem; border-radius: 8px;
+    background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 220, 160, 0.25);
+    color: #f0e0c8; cursor: pointer; transition: all 0.2s; box-shadow: none;
+}
+.ew-btn small { display: block; font-size: 0.7rem; color: #a9d3ff; margin-top: 2px; }
+.ew-btn:hover { border-color: #ffd9a0; transform: none; background: rgba(0, 0, 0, 0.5); }
+.ew-btn.selected {
+    background: linear-gradient(135deg, #ff8c3b, #ff5e3a);
+    color: #fff; border-color: transparent;
+}
+.ew-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.ew-btn:disabled:hover { background: rgba(0, 0, 0, 0.35); border-color: rgba(255, 220, 160, 0.25); }

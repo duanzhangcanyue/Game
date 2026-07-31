@@ -305,7 +305,9 @@ socket.on('symbolUpdate', (data) => {
         game.init(ctx, data.symbol, data.round);
         const name = data.gameType === 'tictactoe'
             ? (data.symbol === 'black' ? 'X' : 'O')
-            : (data.symbol === 'black' ? '黑棋' : '白棋');
+            : data.gameType === 'energywar'
+                ? (data.symbol === 'black' ? '黑方' : '白方')
+                : (data.symbol === 'black' ? '黑棋' : '白棋');
         els.info.textContent = `第 ${data.round} 局，你是 ${name} 方`;
     };
     if (state.activeGame && state.activeGame.key === data.gameType) {
@@ -321,6 +323,14 @@ socket.on('opponentMove', (data) => {
 
 socket.on('opponentGameOver', (data) => {
     if (state.activeGame) state.activeGame.onOpponentGameOver(ctx, data);
+});
+
+socket.on('energyResolve', (data) => {
+    if (state.activeGame) state.activeGame.onEnergyResolve(ctx, data);
+});
+
+socket.on('energyReset', () => {
+    if (state.activeGame) state.activeGame.onEnergyReset(ctx);
 });
 
 socket.on('playerInfo', (info) => {
@@ -408,10 +418,11 @@ socket.on('resumeGame', (data) => {
     showView('game');
     els.restartConfirm.style.display = 'none';
     loadGame(data.gameType).then((game) => {
-        if (data.boardState) {
+        if (data.boardState || (data.energyState && game.key === 'energywar')) {
             game.resume(ctx, {
                 symbol: data.symbol,
                 boardState: data.boardState,
+                energyState: data.energyState,
                 isMyTurn: data.isMyTurn,
                 round: data.round,
                 over: data.over

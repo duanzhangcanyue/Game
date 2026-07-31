@@ -50,6 +50,7 @@ module.exports = function registerGame(io, socket) {
             room.turn = 'black';
             room.boardState = null;
             room.over = false;
+            room.energyState = null;
             const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
             const white = black === room.players[0] ? room.players[1] : room.players[0];
             emitSymbols(io, room, black, white, room.round);
@@ -69,6 +70,7 @@ module.exports = function registerGame(io, socket) {
         room.turn = 'black';
         room.boardState = null;
         room.over = false;
+        room.energyState = null;
         const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
         const white = black === room.players[0] ? room.players[1] : room.players[0];
         emitSymbols(io, room, black, white, room.round);

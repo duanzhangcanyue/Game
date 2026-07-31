@@ -71,10 +71,15 @@ function resumeIntoRoom(io, socket, room, username) {
         symbol,
         round: room.round,
         boardState: room.boardState,
+        energyState: room.energyState,
         isMyTurn: room.turn ? room.turn === symbol : false,
         over: room.over
     });
     socket.to('room_' + room.id).emit('opponentReconnected', { username });
+    if (room.gameType === 'energywar' && room.energyState) {
+        room.energyState.picks = {};
+        io.to('room_' + room.id).emit('energyReset');
+    }
     return symbol;
 }
 
