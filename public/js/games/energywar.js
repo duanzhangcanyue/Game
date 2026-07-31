@@ -54,7 +54,7 @@ function render() {
         for (let i = 0; i < MAX_HP; i++) hearts += `<span class="ew-heart${i < hp[color] ? ' on' : ''}"></span>`;
         let segs = '';
         for (let i = 0; i < MAX_ENERGY; i++) segs += `<span class="ew-seg${i < energy[color] ? ' on' : ''}"></span>`;
-        return `<div class="ew-panel${mine ? ' me' : ''}">
+        return `<div class="ew-panel${mine ? ' me' : ''}" data-color="${color}">
             <div class="ew-name">${colorName(color)}${mine ? '（你）' : ''}</div>
             <div class="ew-hp-row"><span class="ew-label">血量</span>${hearts}</div>
             <div class="ew-en-row"><span class="ew-label">能量</span>${segs}</div>
@@ -93,6 +93,145 @@ function pick(action) {
     ctx.socket.emit('energyPick', { roomId: ctx.getRoomId(), action });
     render();
     updateUI();
+}
+
+function fxPanel(color) {
+    return ctx.board.querySelector(`.ew-panel[data-color="${color}"]`);
+}
+
+function fxCenter(color) {
+    const p = fxPanel(color);
+    if (!p) return null;
+    const b = ctx.board.getBoundingClientRect();
+    const r = p.getBoundingClientRect();
+    return { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+}
+
+function addFx(el, ms) {
+    ctx.board.appendChild(el);
+    setTimeout(() => el.remove(), ms || 1200);
+}
+
+function fxGather(color) {
+    const c = fxCenter(color);
+    if (!c) return;
+    for (let i = 0; i < 6; i++) {
+        const s = document.createElement('div');
+        s.className = 'ew-fx-spark gather';
+        const ang = (i / 6) * Math.PI * 2;
+        const rad = 46;
+        const sx = c.x + Math.cos(ang) * rad;
+        const sy = c.y + Math.sin(ang) * rad;
+        s.style.left = sx + 'px';
+        s.style.top = sy + 'px';
+        s.style.setProperty('--tx', (c.x - sx) + 'px');
+        s.style.setProperty('--ty', (c.y - sy) + 'px');
+        s.style.animationDelay = (i * 0.07) + 's';
+        addFx(s, 1300);
+    }
+}
+
+function fxHeal(color) {
+    const p = fxPanel(color);
+    if (!p) return;
+    const c = fxCenter(color);
+    for (let i = 0; i < 8; i++) {
+        const s = document.createElement('div');
+        s.className = 'ew-fx-spark heal';
+        s.style.left = (c.x + (Math.random() * 44 - 22)) + 'px';
+        s.style.top = (c.y + (Math.random() * 24 - 12)) + 'px';
+        s.style.setProperty('--drift', (Math.random() * 34 - 17) + 'px');
+        s.style.animationDelay = (i * 0.09) + 's';
+        addFx(s, 1500);
+    }
+    const glow = document.createElement('div');
+    glow.className = 'ew-fx-healglow';
+    p.appendChild(glow);
+    setTimeout(() => glow.remove(), 1000);
+}
+
+function fxFire(from, to) {
+    const a = fxCenter(from), b = fxCenter(to);
+    if (!a || !b) return;
+    const bolt = document.createElement('div');
+    bolt.className = 'ew-fx-bolt';
+    bolt.style.left = a.x + 'px';
+    bolt.style.top = a.y + 'px';
+    bolt.style.setProperty('--dx', (b.x - a.x) + 'px');
+    bolt.style.setProperty('--dy', (b.y - a.y) + 'px');
+    addFx(bolt, 700);
+    setTimeout(() => fxImpact(to), 380);
+}
+
+function fxImpact(color) {
+    const c = fxCenter(color);
+    if (!c) return;
+    const el = document.createElement('div');
+    el.className = 'ew-fx-impact';
+    el.style.left = c.x + 'px';
+    el.style.top = c.y + 'px';
+    addFx(el, 700);
+}
+
+function fxBurst(color) {
+    const c = fxCenter(color);
+    if (!c) return;
+    const el = document.createElement('div');
+    el.className = 'ew-fx-burst';
+    el.style.left = c.x + 'px';
+    el.style.top = c.y + 'px';
+    addFx(el, 800);
+}
+
+function fxShield(color) {
+    const c = fxCenter(color);
+    if (!c) return;
+    const el = document.createElement('div');
+    el.className = 'ew-fx-shield';
+    el.style.left = c.x + 'px';
+    el.style.top = c.y + 'px';
+    addFx(el, 900);
+}
+
+function fxInterrupted(color) {
+    const p = fxPanel(color);
+    if (!p) return;
+    p.classList.remove('ew-shake');
+    void p.offsetWidth;
+    p.classList.add('ew-shake');
+    const flash = document.createElement('div');
+    flash.className = 'ew-fx-flash';
+    p.appendChild(flash);
+    setTimeout(() => {
+        flash.remove();
+        p.classList.remove('ew-shake');
+    }, 800);
+}
+
+function fxTimeout(color) {
+    const c = fxCenter(color);
+    if (!c) return;
+    const el = document.createElement('div');
+    el.className = 'ew-fx-timeout';
+    el.style.left = c.x + 'px';
+    el.style.top = c.y + 'px';
+    el.textContent = '超时';
+    addFx(el, 1200);
+}
+
+function playEffects(events) {
+    for (const ev of events || []) {
+        switch (ev.type) {
+            case 'gather': fxGather(ev.color); break;
+            case 'heal': fxHeal(ev.color); break;
+            case 'fire': fxFire(ev.color, ev.target); break;
+            case 'fireBlocked': fxShield(ev.target); break;
+            case 'burst': fxBurst(ev.target); break;
+            case 'gatherInterrupted':
+            case 'healInterrupted': fxInterrupted(ev.color); break;
+            case 'timeout': fxTimeout(ev.color); break;
+        }
+    }
 }
 
 export default {
@@ -172,6 +311,7 @@ export default {
         gameActive = !data.winner;
         paused = false;
         render();
+        playEffects(data.events);
 
         const lines = [];
         const myPick = ACTION_NAMES[picks[mySymbol]] || '?';

@@ -329,6 +329,8 @@ input::placeholder { color: rgba(255,255,255,0.5); }
     border: 1px solid rgba(255, 220, 160, 0.25);
     border-radius: 12px;
     padding: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 .ew-panels { display: flex; justify-content: space-between; align-items: stretch; gap: 0.6rem; margin-bottom: 1rem; }
 .ew-panel {
@@ -366,6 +368,100 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 }
 .ew-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .ew-btn:disabled:hover { background: rgba(0, 0, 0, 0.35); border-color: rgba(255, 220, 160, 0.25); }
+
+/* 能量战特效 */
+.ew-panel { position: relative; overflow: hidden; }
+.ew-fx-spark {
+    position: absolute; z-index: 5; pointer-events: none;
+    width: 12px; height: 12px; margin-left: -6px; margin-top: -6px;
+    border-radius: 50%; box-shadow: 0 0 8px rgba(74, 158, 255, 0.8);
+    animation: fx-spark 0.7s ease-out forwards; opacity: 0;
+}
+.ew-fx-spark.gather { background: linear-gradient(135deg, #9fd0ff, #2a6bff); }
+.ew-fx-spark.heal { background: linear-gradient(135deg, #b8f7c8, #27ae60); box-shadow: 0 0 8px rgba(123, 237, 159, 0.8); }
+@keyframes fx-spark {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(var(--tx, 0), var(--ty, -40px)) scale(0.2); opacity: 0; }
+}
+.ew-fx-healglow {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: 10px;
+    background: radial-gradient(circle, rgba(123, 237, 159, 0.45), transparent 70%);
+    animation: fx-glow 1s ease-out forwards;
+}
+@keyframes fx-glow {
+    0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; }
+}
+.ew-fx-bolt {
+    position: absolute; z-index: 6; pointer-events: none;
+    width: 16px; height: 16px; margin-left: -8px; margin-top: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, #ff8c3b 45%, #ff5e3a 100%);
+    box-shadow: 0 0 14px 4px rgba(255, 120, 60, 0.8);
+    animation: fx-bolt 0.55s ease-in forwards;
+}
+@keyframes fx-bolt {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.6); opacity: 0.9; }
+}
+.ew-fx-impact {
+    position: absolute; z-index: 5; pointer-events: none;
+    width: 46px; height: 46px; margin-left: -23px; margin-top: -23px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 220, 150, 0.9) 0%, rgba(255, 94, 58, 0.6) 55%, transparent 72%);
+    animation: fx-impact 0.5s ease-out forwards;
+}
+@keyframes fx-impact {
+    0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+.ew-fx-burst {
+    position: absolute; z-index: 7; pointer-events: none;
+    width: 120px; height: 120px; margin-left: -60px; margin-top: -60px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, #fff 0%, #ffe08a 20%, rgba(255, 140, 59, 0.9) 48%, transparent 72%);
+    animation: fx-burst 0.6s ease-out forwards;
+}
+@keyframes fx-burst {
+    0% { transform: scale(0.1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+.ew-fx-shield {
+    position: absolute; z-index: 6; pointer-events: none;
+    width: 70px; height: 70px; margin-left: -35px; margin-top: -35px;
+    border-radius: 50%;
+    border: 4px solid #7bed9f;
+    box-shadow: inset 0 0 18px rgba(123, 237, 159, 0.5), 0 0 16px rgba(123, 237, 159, 0.7);
+    animation: fx-shield 0.6s ease-out forwards;
+}
+@keyframes fx-shield {
+    0% { transform: scale(0.3); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+.ew-fx-flash {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: 10px;
+    background: radial-gradient(circle, rgba(255, 60, 60, 0.55), transparent 70%);
+    animation: fx-glow 0.7s ease-out forwards;
+}
+.ew-shake { animation: fx-shake 0.5s linear; }
+@keyframes fx-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+.ew-fx-timeout {
+    position: absolute; z-index: 6; pointer-events: none;
+    font-size: 0.75rem; color: #a9a9c0; padding: 2px 8px; border-radius: 8px;
+    background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fx-timeout 1.1s ease-out forwards;
+}
+@keyframes fx-timeout {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-36px); opacity: 0; }
+}
 
 /* 手机端 */
 @media (max-width: 520px) {
