@@ -25,4 +25,10 @@ module.exports = function registerAuth(io, socket) {
         cb && cb({ ok: true, username, score: u.score });
         console.log(`用户登录: ${username}`);
     });
+
+    socket.on('logout', () => {
+        const username = socket.data.username;
+        delete socket.data.username;
+        console.log(`用户退出登录: ${username}`);
+    });
 };

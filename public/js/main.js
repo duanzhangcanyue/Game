@@ -16,6 +16,11 @@ const els = {
     adminInfo: document.getElementById('adminInfo'),
     adminTbody: document.getElementById('adminTbody'),
     adminError: document.getElementById('adminError'),
+    adminModal: document.getElementById('adminModal'),
+    adminModalTitle: document.getElementById('adminModalTitle'),
+    adminModalInput: document.getElementById('adminModalInput'),
+    adminModalOk: document.getElementById('adminModalOk'),
+    adminModalCancel: document.getElementById('adminModalCancel'),
     board: document.getElementById('board'),
     status: document.getElementById('status'),
     info: document.getElementById('info'),
@@ -25,6 +30,7 @@ const els = {
     acceptBtn: document.getElementById('acceptBtn'),
     rejectBtn: document.getElementById('rejectBtn'),
     leaveRoomBtn: document.getElementById('leaveRoomBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
     playerBlack: document.getElementById('playerBlack'),
     playerWhite: document.getElementById('playerWhite'),
     lobbyUser: document.getElementById('lobbyUser'),
@@ -177,6 +183,23 @@ els.leaveRoomBtn.addEventListener('click', () => {
         showView('lobby');
         socket.emit('getRooms');
     });
+});
+
+els.logoutBtn.addEventListener('click', () => {
+    socket.emit('logout');
+    socket.__authed = false;
+    localStorage.removeItem('ml_session');
+    state.myUsername = null;
+    state.myScore = 0;
+    state.roomId = null;
+    state.gameType = null;
+    state.activeGame = null;
+    state.started = false;
+    resetPlayersBar();
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('authError').textContent = '';
+    showView('auth');
 });
 
 els.restartBtn.addEventListener('click', () => {
@@ -410,15 +433,16 @@ function renderAdminTable() {
     }
     adminUsers.forEach((u) => {
         const tr = document.createElement('tr');
+        const actions = u.gm
+            ? '<span style="color:#a9d3ff;">不可操作</span>'
+            : `<button class="small" data-action="pwd" data-user="${escapeHtml(u.username)}">改密</button>
+               <button class="small" data-action="score" data-user="${escapeHtml(u.username)}">改分</button>
+               <button class="small danger" data-action="del" data-user="${escapeHtml(u.username)}">删除</button>`;
         tr.innerHTML = `
             <td>${escapeHtml(u.username)}${u.gm ? ' <span class="game-badge">GM</span>' : ''}</td>
-            <td class="admin-pwd">${escapeHtml(u.password)}</td>
+            <td class="admin-pwd">${u.gm ? '••••••' : escapeHtml(u.password)}</td>
             <td>${u.score}</td>
-            <td class="admin-actions">
-                <button class="small" data-action="pwd" data-user="${escapeHtml(u.username)}">改密</button>
-                <button class="small" data-action="score" data-user="${escapeHtml(u.username)}">改分</button>
-                <button class="small danger" data-action="del" data-user="${escapeHtml(u.username)}">删除</button>
-            </td>
+            <td class="admin-actions">${actions}</td>
         `;
         els.adminTbody.appendChild(tr);
     });
@@ -439,32 +463,73 @@ els.adminBackBtn.addEventListener('click', () => {
     showView('lobby');
 });
 
+let adminModalAction = null;
+let adminModalUser = null;
+
+function openAdminModal(title) {
+    els.adminModalTitle.textContent = title;
+    els.adminModalInput.value = '';
+    const isConfirm = adminModalAction === 'del';
+    els.adminModalInput.style.display = isConfirm ? 'none' : '';
+    els.adminModal.style.display = 'block';
+    if (!isConfirm) els.adminModalInput.focus();
+}
+
+function closeAdminModal() {
+    els.adminModal.style.display = 'none';
+    adminModalAction = null;
+    adminModalUser = null;
+}
+
+els.adminModalOk.addEventListener('click', () => {
+    if (!adminModalAction) return;
+    const user = adminModalUser;
+    const val = els.adminModalInput.value.trim();
+    const action = adminModalAction;
+    closeAdminModal();
+    if (action === 'pwd') {
+        if (!val) { els.adminError.textContent = '密码不能为空'; return; }
+        socket.emit('adminSetPassword', { username: user, password: val }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    } else if (action === 'score') {
+        if (!/^\d+$/.test(val)) { els.adminError.textContent = '积分须为非负整数'; return; }
+        socket.emit('adminSetScore', { username: user, score: val }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    } else if (action === 'del') {
+        socket.emit('adminDeleteUser', { username: user }, (res) => {
+            els.adminError.textContent = res.ok ? '' : res.msg;
+            if (res.ok) loadAdminUsers();
+        });
+    }
+});
+
+els.adminModalCancel.addEventListener('click', closeAdminModal);
+
+els.adminModalInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') els.adminModalOk.click();
+});
+
 els.adminTbody.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
     const user = btn.dataset.user;
     const action = btn.dataset.action;
     if (action === 'pwd') {
-        const pwd = prompt('为用户 ' + user + ' 设置新密码：');
-        if (pwd === null) return;
-        if (!pwd) { els.adminError.textContent = '密码不能为空'; return; }
-        socket.emit('adminSetPassword', { username: user, password: pwd }, (res) => {
-            els.adminError.textContent = res.ok ? '' : res.msg;
-            if (res.ok) loadAdminUsers();
-        });
+        adminModalAction = 'pwd';
+        adminModalUser = user;
+        openAdminModal('为用户 ' + user + ' 设置新密码');
     } else if (action === 'score') {
-        const score = prompt('为用户 ' + user + ' 设置新积分：');
-        if (score === null) return;
-        socket.emit('adminSetScore', { username: user, score }, (res) => {
-            els.adminError.textContent = res.ok ? '' : res.msg;
-            if (res.ok) loadAdminUsers();
-        });
+        adminModalAction = 'score';
+        adminModalUser = user;
+        openAdminModal('为用户 ' + user + ' 设置新积分');
     } else if (action === 'del') {
-        if (!confirm('确定删除用户 ' + user + ' 吗？')) return;
-        socket.emit('adminDeleteUser', { username: user }, (res) => {
-            els.adminError.textContent = res.ok ? '' : res.msg;
-            if (res.ok) loadAdminUsers();
-        });
+        adminModalAction = 'del';
+        adminModalUser = user;
+        openAdminModal('确定删除用户 ' + user + ' 吗？');
     }
 });
 

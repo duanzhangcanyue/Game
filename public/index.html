@@ -35,7 +35,10 @@
             <div class="lobby-top">
                 <span class="info">玩家: <span id="lobbyUser"></span></span>
                 <span class="score-badge">积分: <span id="lobbyScore"></span></span>
-                <button class="small secondary" id="adminBtn" style="display:none;">用户管理</button>
+                <span style="display:flex; gap:0.5rem;">
+                    <button class="small secondary" id="adminBtn" style="display:none;">用户管理</button>
+                    <button class="small" id="logoutBtn">退出登录</button>
+                </span>
             </div>
             <div class="status" id="lobbyStatus"></div>
             <div class="room-grid" id="roomGrid"></div>
@@ -116,6 +119,14 @@
                 </table>
             </div>
             <div class="error-msg" id="adminError"></div>
+            <div id="adminModal" style="display:none; margin-top:0.8rem; max-width:320px; margin-left:auto; margin-right:auto; text-align:left;">
+                <div class="info" id="adminModalTitle"></div>
+                <input type="text" id="adminModalInput">
+                <div style="display:flex; gap:0.8rem; justify-content:center;">
+                    <button class="small" id="adminModalOk">确定</button>
+                    <button class="small secondary" id="adminModalCancel">取消</button>
+                </div>
+            </div>
         </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
