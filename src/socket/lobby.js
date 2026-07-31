@@ -78,7 +78,7 @@ module.exports = function registerLobby(io, socket) {
         const room = rooms[id];
         if (!room || !room.players.includes(username)) return cb && cb({ ok: false });
         socket.leave('room_' + id);
-        if (room.players.length === 2 && !room.disconnected[username]) {
+        if (room.players.length === 2 && !room.disconnected[username] && !room.over) {
             startGrace(io, room, username, socket);
             cb && cb({ ok: true });
             console.log(`${username} 退出房间 ${id}，进入 10 秒倒计时`);
@@ -87,6 +87,8 @@ module.exports = function registerLobby(io, socket) {
         room.players = room.players.filter(p => p !== username);
         if (room.players.length === 0) {
             resetRoom(room);
+        } else {
+            io.to('room_' + id).emit('opponentLeft', { username });
         }
         cb && cb({ ok: true });
         broadcastRooms(io);
