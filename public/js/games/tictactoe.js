@@ -1,5 +1,5 @@
 const SIZE = 3;
-let ctx, boardState, mySymbol, myMark, isMyTurn, gameActive, cells;
+let ctx, boardState, mySymbol, myMark, isMyTurn, gameActive, paused, cells;
 
 const WIN_PATTERNS = [
     [[0,0],[0,1],[0,2]], [[1,0],[1,1],[1,2]], [[2,0],[2,1],[2,2]],
@@ -61,6 +61,10 @@ function renderBoard() {
 
 function updateUI() {
     if (!gameActive) return;
+    if (paused) {
+        ctx.status.innerHTML = '等待对方重连（10 秒）...';
+        return;
+    }
     if (!isMyTurn) {
         ctx.status.innerHTML = '等待对手下棋...';
     } else {
@@ -69,7 +73,7 @@ function updateUI() {
 }
 
 function handleCellClick(r, c) {
-    if (!gameActive || !isMyTurn) return;
+    if (!gameActive || paused || !isMyTurn) return;
     if (boardState[r][c]) return;
     boardState[r][c] = myMark;
     const line = checkWin();
@@ -104,6 +108,7 @@ export default {
         myMark = symbol === 'black' ? 'X' : 'O';
         isMyTurn = (myMark === 'X');
         gameActive = true;
+        paused = false;
         boardState = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
         renderBoard();
         updateUI();
@@ -115,7 +120,26 @@ export default {
         boardState = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
         gameActive = false;
         isMyTurn = false;
+        paused = false;
         renderBoard();
+    },
+
+    resume(c, data) {
+        ctx = c;
+        mySymbol = data.symbol;
+        myMark = data.symbol === 'black' ? 'X' : 'O';
+        isMyTurn = data.over ? false : data.isMyTurn;
+        gameActive = !data.over;
+        paused = false;
+        boardState = data.boardState;
+        renderBoard();
+        updateUI();
+        ctx.restartBtn.disabled = false;
+    },
+
+    setPaused(p) {
+        paused = p;
+        updateUI();
     },
 
     onOpponentMove(c, data) {

@@ -1,5 +1,5 @@
 const SIZE = 4;
-let ctx, boardState, mySymbol, isMyTurn, gameActive, selected, cells;
+let ctx, boardState, mySymbol, isMyTurn, gameActive, paused, selected, cells;
 
 function inBoard(r, c) {
     return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
@@ -60,7 +60,7 @@ function updateCounts() {
 }
 
 function isValidMoveTarget(r, c) {
-    if (!gameActive || !isMyTurn || !selected) return false;
+    if (!gameActive || paused || !isMyTurn || !selected) return false;
     if (boardState[r][c]) return false;
     return Math.abs(r - selected[0]) + Math.abs(c - selected[1]) === 1;
 }
@@ -171,6 +171,10 @@ function renderBoard() {
 
 function updateUI() {
     if (!gameActive) return;
+    if (paused) {
+        ctx.status.innerHTML = '等待对方重连（10 秒）...';
+        return;
+    }
     if (!isMyTurn) {
         ctx.status.innerHTML = '等待对手行动...';
     } else {
@@ -179,7 +183,7 @@ function updateUI() {
 }
 
 function handleCellClick(r, c) {
-    if (!gameActive || !isMyTurn) return;
+    if (!gameActive || paused || !isMyTurn) return;
     if (boardState[r][c] === mySymbol) {
         selected = [r, c];
         renderBoard();
@@ -224,6 +228,7 @@ export default {
         mySymbol = symbol;
         isMyTurn = (mySymbol === 'black');
         gameActive = true;
+        paused = false;
         selected = null;
         boardState = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
         for (let col = 0; col < SIZE; col++) {
@@ -240,8 +245,27 @@ export default {
         boardState = Array.from({ length: SIZE }, () => Array(SIZE).fill(''));
         gameActive = false;
         isMyTurn = false;
+        paused = false;
         selected = null;
         renderBoard();
+    },
+
+    resume(c, data) {
+        ctx = c;
+        mySymbol = data.symbol;
+        isMyTurn = data.over ? false : data.isMyTurn;
+        gameActive = !data.over;
+        paused = false;
+        selected = null;
+        boardState = data.boardState;
+        renderBoard();
+        updateUI();
+        ctx.restartBtn.disabled = false;
+    },
+
+    setPaused(p) {
+        paused = p;
+        updateUI();
     },
 
     onOpponentMove(c, data) {

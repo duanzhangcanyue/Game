@@ -19,6 +19,9 @@ function doAuth(socket, mode, onAuthSuccess) {
     socket.emit(event, { username, password }, (res) => {
         if (res.ok) {
             errorEl.textContent = '';
+            socket.__authed = true;
+            const prev = JSON.parse(localStorage.getItem('ml_session') || '{}');
+            localStorage.setItem('ml_session', JSON.stringify({ ...prev, username, password }));
             onAuthSuccess(res.username, res.score);
         } else {
             errorEl.textContent = res.msg;

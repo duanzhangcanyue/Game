@@ -32,10 +32,30 @@ const els = {
     appTitle: document.getElementById('appTitle')
 };
 
+function getSession() {
+    try { return JSON.parse(localStorage.getItem('ml_session') || 'null'); } catch (e) { return null; }
+}
+
+function saveRoom(roomId) {
+    const session = getSession();
+    if (!session) return;
+    session.roomId = roomId;
+    localStorage.setItem('ml_session', JSON.stringify(session));
+}
+
+function clearSavedRoom() {
+    const session = getSession();
+    if (!session) return;
+    delete session.roomId;
+    localStorage.setItem('ml_session', JSON.stringify(session));
+}
+
+const savedSession = getSession();
+
 const state = {
     myUsername: null,
     myScore: 0,
-    roomId: null,
+    roomId: (savedSession && savedSession.roomId) || null,
     gameType: null,
     activeGame: null,
     started: false
@@ -70,6 +90,7 @@ function enterGame(roomId, gameType, isCreator) {
     state.roomId = roomId;
     state.gameType = gameType;
     state.started = false;
+    saveRoom(roomId);
     setPlayerSyms();
     showView('game');
     els.restartConfirm.style.display = 'none';
@@ -137,8 +158,10 @@ function onAuthSuccess(username, score) {
     els.lobbyUser.textContent = username;
     els.lobbyScore.textContent = score;
     els.adminBtn.style.display = (username === GM_USERNAME) ? 'inline-block' : 'none';
-    showView('lobby');
-    socket.emit('getRooms');
+    if (!state.roomId) {
+        showView('lobby');
+        socket.emit('getRooms');
+    }
 }
 
 auth.init(app, { showView, onAuthSuccess });
@@ -149,6 +172,7 @@ els.leaveRoomBtn.addEventListener('click', () => {
     socket.emit('leaveRoom', state.roomId, () => {
         state.activeGame = null;
         state.roomId = null;
+        clearSavedRoom();
         resetPlayersBar();
         showView('lobby');
         socket.emit('getRooms');
@@ -173,6 +197,40 @@ els.rejectBtn.addEventListener('click', () => {
 });
 
 /* ---------- socket 事件 ---------- */
+socket.on('disconnect', () => {
+    socket.__authed = false;
+});
+
+socket.on('connect', () => {
+    const session = getSession();
+    if (!session || !session.username || !session.password || socket.__authed) return;
+    socket.emit('login', { username: session.username, password: session.password }, (res) => {
+        if (!res || !res.ok) {
+            localStorage.removeItem('ml_session');
+            return;
+        }
+        socket.__authed = true;
+        if (!state.myUsername) {
+            onAuthSuccess(res.username, res.score);
+        } else {
+            state.myScore = res.score;
+            els.lobbyScore.textContent = res.score;
+        }
+        if (state.roomId) {
+            socket.emit('resumeRoom', state.roomId, (rres) => {
+                if (!rres || !rres.ok) {
+                    state.roomId = null;
+                    state.activeGame = null;
+                    clearSavedRoom();
+                    resetPlayersBar();
+                    showView('lobby');
+                    socket.emit('getRooms');
+                }
+            });
+        }
+    });
+});
+
 socket.on('roomsUpdate', (rooms) => {
     lobby.renderRooms(app, rooms);
 });
@@ -228,10 +286,59 @@ socket.on('restartDeclined', () => {
 });
 
 socket.on('opponentDisconnected', () => {
-    els.status.textContent = '对手已离开';
-    els.info.textContent = '连接断开，可返回大厅';
+    els.status.textContent = '对手已断开连接';
+    els.info.textContent = '等待对方重连（10 秒）...';
     els.restartBtn.disabled = true;
     els.restartConfirm.style.display = 'none';
+    if (state.activeGame) state.activeGame.setPaused(true);
+});
+
+socket.on('opponentReconnected', () => {
+    els.status.textContent = '';
+    els.info.textContent = '对方已重连，继续对局';
+    els.restartBtn.disabled = false;
+    if (state.activeGame) state.activeGame.setPaused(false);
+});
+
+socket.on('opponentDisconnectTimeout', () => {
+    els.status.textContent = '对手未在 10 秒内重连';
+    els.info.textContent = '对方被扣除 10 积分，可等待新对手加入';
+    els.restartBtn.disabled = true;
+    els.restartConfirm.style.display = 'none';
+    const mine = els.playerBlack.classList.contains('me') ? els.playerBlack : els.playerWhite;
+    const other = mine === els.playerBlack ? els.playerWhite : els.playerBlack;
+    other.querySelector('.player-name').textContent = '';
+    other.querySelector('.player-score').textContent = '';
+    const sym = other.querySelector('.player-sym');
+    sym.className = 'player-sym';
+    sym.textContent = '';
+});
+
+socket.on('resumeGame', (data) => {
+    state.roomId = data.roomId;
+    state.gameType = data.gameType;
+    saveRoom(data.roomId);
+    setPlayerSyms();
+    showView('game');
+    els.restartConfirm.style.display = 'none';
+    loadGame(data.gameType).then((game) => {
+        if (data.boardState) {
+            game.resume(ctx, {
+                symbol: data.symbol,
+                boardState: data.boardState,
+                isMyTurn: data.isMyTurn,
+                round: data.round,
+                over: data.over
+            });
+        } else {
+            state.started = false;
+            els.status.textContent = '';
+            els.info.textContent = '已回到房间，等待对手...';
+            els.restartBtn.disabled = true;
+            game.renderWaiting(ctx);
+            setWaitingPlayer(data.symbol === 'black' ? 'black' : 'white', state.myUsername, state.myScore);
+        }
+    });
 });
 
 socket.on('opponentLeft', () => {
@@ -251,6 +358,7 @@ socket.on('opponentLeft', () => {
 socket.on('leftRoom', () => {
     state.activeGame = null;
     state.roomId = null;
+    clearSavedRoom();
     resetPlayersBar();
     showView('lobby');
     socket.emit('getRooms');
