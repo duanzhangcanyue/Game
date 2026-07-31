@@ -5,6 +5,11 @@ body {
     background: url('../bg.jpg') center / cover no-repeat fixed;
     background-color: #1a1440;
 }
+@media (min-width: 768px) {
+    body {
+        background-image: url('../bg_pc.jpg');
+    }
+}
 .container {
     text-align: center; background: rgba(15, 12, 32, 0.18);
     padding: 2rem 1rem;
@@ -105,19 +110,19 @@ h1 {
     box-shadow: inset 0 0 0 0 rgba(0,0,0,0.2), 0 0 40px rgba(255,140,50,0.15);
 }
 .board-tictactoe .cell {
-    background: #ffffff;
+    background: #fafafa;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-.board-tictactoe .cell:hover { background: #e0e0e0; }
-.board-tictactoe .tt-x { color: #e74c3c; text-shadow: 0 2px 6px rgba(231,76,60,0.4); }
-.board-tictactoe .tt-o { color: #3498db; text-shadow: 0 2px 6px rgba(52,152,219,0.4); }
-.board-tictactoe .cell.tt-win { background: #a8e6cf !important; box-shadow: none; }
+.board-tictactoe .cell:hover { background: #ececec; }
+.board-tictactoe .tt-x { color: #d99898; text-shadow: none; }
+.board-tictactoe .tt-o { color: #98b8d9; text-shadow: none; }
+.board-tictactoe .cell.tt-win { background: #d5ece3 !important; box-shadow: none; }
 .board-tictactoe .cell.hint::after { box-shadow: inset 0 0 0 3px #667eea; }
-.tt-mark { font-size: clamp(2.4rem, 12vw, 5.5rem); font-weight: bold; line-height: 1; }
-.tt-x { color: #ff6b6b; text-shadow: 0 2px 6px rgba(255,80,80,0.5); }
-.tt-o { color: #6bb8ff; text-shadow: 0 2px 6px rgba(80,160,255,0.5); }
-.cell.tt-win { background: rgba(126, 217, 87, 0.5) !important; box-shadow: inset 0 0 20px rgba(126, 217, 87, 0.7); }
+.tt-mark { font-size: clamp(2.4rem, 12vw, 5.5rem); font-weight: 600; line-height: 1; }
+.tt-x { color: #d99898; text-shadow: none; }
+.tt-o { color: #98b8d9; text-shadow: none; }
+.cell.tt-win { background: rgba(200, 225, 215, 0.6) !important; box-shadow: none; }
 .cell.tt-disabled { cursor: default; }
 .gomoku-cell.selected { background: rgba(52, 152, 219, 0.2); border-radius: 4px; }
 .game-select { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
@@ -277,8 +282,8 @@ input::placeholder { color: rgba(255,255,255,0.5); }
     background: #f0f0f0; font-weight: bold; font-size: 15px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-.sym-x { color: #e74c3c; }
-.sym-o { color: #3498db; }
+.sym-x { color: #d99898; }
+.sym-o { color: #98b8d9; }
 .player-name { font-size: 0.95rem; color: #ffd9a0; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-score { font-size: 0.8rem; color: #a9d3ff; }
 .vs-text { font-size: 1.2rem; font-weight: bold; color: #ff5e3a; text-shadow: 0 0 8px rgba(255,90,40,0.6); }
