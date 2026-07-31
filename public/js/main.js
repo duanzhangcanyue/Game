@@ -133,9 +133,11 @@ function setPlayerSyms() {
 
 function setWaitingPlayer(color, name, score) {
     const card = color === 'black' ? els.playerBlack : els.playerWhite;
+    const other = card === els.playerBlack ? els.playerWhite : els.playerBlack;
     card.querySelector('.player-name').textContent = name;
     card.querySelector('.player-score').textContent = '积分 ' + score;
     card.classList.toggle('me', name === state.myUsername);
+    other.classList.remove('me');
 }
 
 function updatePlayersBar(info) {
@@ -155,6 +157,8 @@ function resetPlayersBar() {
     els.playerBlack.querySelector('.player-score').textContent = '--';
     els.playerWhite.querySelector('.player-name').textContent = '等待中';
     els.playerWhite.querySelector('.player-score').textContent = '--';
+    els.playerBlack.classList.remove('me');
+    els.playerWhite.classList.remove('me');
 }
 
 /* ---------- 认证成功回调 ---------- */
@@ -494,7 +498,7 @@ els.adminModalOk.addEventListener('click', () => {
             if (res.ok) loadAdminUsers();
         });
     } else if (action === 'score') {
-        if (!/^\d+$/.test(val)) { els.adminError.textContent = '积分须为非负整数'; return; }
+        if (!/^-?\d+$/.test(val)) { els.adminError.textContent = '积分须为整数'; return; }
         socket.emit('adminSetScore', { username: user, score: val }, (res) => {
             els.adminError.textContent = res.ok ? '' : res.msg;
             if (res.ok) loadAdminUsers();

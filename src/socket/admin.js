@@ -22,7 +22,7 @@ module.exports = function registerAdmin(io, socket) {
     socket.on('adminSetScore', ({ username, score }, cb) => {
         if (!isGM(socket)) return cb && cb({ ok: false, msg: '无权限' });
         const s = Number(score);
-        if (!Number.isFinite(s) || s < 0) return cb && cb({ ok: false, msg: '积分无效' });
+        if (!Number.isFinite(s)) return cb && cb({ ok: false, msg: '积分无效' });
         if (!setScore(username, s)) return cb && cb({ ok: false, msg: '用户不存在' });
         cb && cb({ ok: true });
         io.emit('scoreUpdate', { [username]: s });

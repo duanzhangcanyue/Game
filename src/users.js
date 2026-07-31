@@ -27,7 +27,7 @@ function ensureGM() {
             username: config.GM_USERNAME,
             password: hashPwd(config.GM_PASSWORD),
             plain: config.GM_PASSWORD,
-            score: 0,
+            score: config.START_SCORE,
             gm: true
         };
         saveUsers();

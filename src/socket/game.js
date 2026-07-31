@@ -26,7 +26,7 @@ module.exports = function registerGame(io, socket) {
             const loser = data.winner === 'black' ? room.players[1] : room.players[0];
             if (winner && loser && users[winner] && users[loser]) {
                 users[winner].score += config.WIN_SCORE;
-                users[loser].score = Math.max(0, users[loser].score - config.WIN_SCORE);
+                users[loser].score -= config.WIN_SCORE;
                 saveUsers();
                 io.to('room_' + data.roomId).emit('scoreUpdate', {
                     [winner]: users[winner].score,

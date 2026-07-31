@@ -38,7 +38,7 @@ function finishGrace(io, room, username) {
         const winner = room.players[0];
         if (!room.disconnected[winner] && users[winner] && users[username]) {
             users[winner].score += config.WIN_SCORE;
-            users[username].score = Math.max(0, users[username].score - config.WIN_SCORE);
+            users[username].score -= config.WIN_SCORE;
             saveUsers();
             io.to('room_' + room.id).emit('scoreUpdate', {
                 [winner]: users[winner].score,
