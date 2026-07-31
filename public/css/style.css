@@ -60,6 +60,59 @@ h1 {
 }
 .gomoku-cell.hint::before { width: 22%; height: 22%; background: rgba(52, 152, 219, 0.25); border-radius: 50%; }
 .cell.hint::after { inset: 0; box-shadow: inset 0 0 0 3px rgba(52, 152, 219, 0.35); border-radius: 4px; }
+
+/* 五子棋：原版金色棋盘 */
+.board-gomoku {
+    background-color: #dcb35c;
+    background-image:
+        linear-gradient(#b8860b 1px, transparent 1px),
+        linear-gradient(90deg, #b8860b 1px, transparent 1px);
+    background-size:
+        calc(100% / var(--n, 4)) calc(100% / var(--n, 4)),
+        calc(100% / var(--n, 4)) calc(100% / var(--n, 4));
+    background-origin: content-box;
+    background-clip: content-box;
+    padding: max(3px, 0.8%); border-radius: 8px;
+    border: 2px solid #b8860b;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 0 40px rgba(255,140,50,0.15);
+}
+.board-gomoku .star {
+    width: 22%; height: 22%; border-radius: 50%;
+    background: #c9a24f;
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+.board-gomoku .stone {
+    width: 78%; height: 78%;
+    position: relative; z-index: 2;
+    background-size: cover; background-position: center;
+}
+.board-gomoku .stone.black { background-image: radial-gradient(circle at 35% 35%, #666, #000); }
+.board-gomoku .stone.white { background-image: radial-gradient(circle at 35% 35%, #fff, #ccc); }
+.board-gomoku .tt-win { background: rgba(231, 76, 60, 0.35) !important; box-shadow: inset 0 0 20px rgba(231, 76, 60, 0.5); }
+.board-gomoku .gomoku-cell.selected { background: rgba(52, 152, 219, 0.2); border-radius: 4px; }
+
+/* 井字棋：原版浅色格子，红叉蓝圈 */
+.board-tictactoe {
+    background: #f0f0f0;
+    background-image: none;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: inset 0 0 0 0 rgba(0,0,0,0.2), 0 0 40px rgba(255,140,50,0.15);
+}
+.board-tictactoe .cell {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.board-tictactoe .cell:hover { background: #e0e0e0; }
+.board-tictactoe .tt-x { color: #e74c3c; text-shadow: 0 2px 6px rgba(231,76,60,0.4); }
+.board-tictactoe .tt-o { color: #3498db; text-shadow: 0 2px 6px rgba(52,152,219,0.4); }
+.board-tictactoe .cell.tt-win { background: #a8e6cf !important; box-shadow: none; }
+.board-tictactoe .cell.hint::after { box-shadow: inset 0 0 0 3px #667eea; }
 .tt-mark { font-size: clamp(2.4rem, 12vw, 5.5rem); font-weight: bold; line-height: 1; }
 .tt-x { color: #ff6b6b; text-shadow: 0 2px 6px rgba(255,80,80,0.5); }
 .tt-o { color: #6bb8ff; text-shadow: 0 2px 6px rgba(80,160,255,0.5); }

@@ -39,7 +39,13 @@ function boardFull() {
     return true;
 }
 
+function isStarPoint(r, c) {
+    return [3, 7, 11].includes(r) && [3, 7, 11].includes(c);
+}
+
 function renderBoard() {
+    ctx.board.classList.remove('board-erdayi', 'board-tictactoe');
+    ctx.board.classList.add('board-gomoku');
     ctx.board.style.setProperty('--n', SIZE);
     ctx.board.style.width = 'min(540px, calc(100vw - 44px))';
     ctx.board.innerHTML = '';
@@ -50,6 +56,11 @@ function renderBoard() {
             cell.dataset.row = r;
             cell.dataset.col = c;
             cell.addEventListener('click', () => handleCellClick(r, c));
+            if (isStarPoint(r, c)) {
+                const dot = document.createElement('div');
+                dot.className = 'star';
+                cell.appendChild(dot);
+            }
             if (boardState[r][c]) {
                 const s = document.createElement('div');
                 s.className = 'stone ' + boardState[r][c];
