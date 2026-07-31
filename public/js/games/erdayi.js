@@ -142,7 +142,7 @@ function renderBoard() {
     ctx.board.classList.remove('board-gomoku', 'board-tictactoe');
     ctx.board.classList.add('board-erdayi');
     ctx.board.style.setProperty('--n', SIZE);
-    ctx.board.style.width = 'min(540px, calc(100vw - 44px))';
+    ctx.board.style.width = 'min(540px, 100%)';
     ctx.board.innerHTML = '';
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {

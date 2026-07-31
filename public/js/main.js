@@ -35,6 +35,10 @@ const els = {
     playerWhite: document.getElementById('playerWhite'),
     lobbyUser: document.getElementById('lobbyUser'),
     lobbyScore: document.getElementById('lobbyScore'),
+    rankBtn: document.getElementById('rankBtn'),
+    rankModal: document.getElementById('rankModal'),
+    rankList: document.getElementById('rankList'),
+    rankCloseBtn: document.getElementById('rankCloseBtn'),
     appTitle: document.getElementById('appTitle')
 };
 
@@ -176,6 +180,37 @@ function onAuthSuccess(username, score) {
 
 auth.init(app, { showView, onAuthSuccess });
 lobby.init(app, { showView, enterGame });
+
+/* ---------- 排行榜 ---------- */
+els.rankBtn.addEventListener('click', () => {
+    els.rankModal.style.display = 'block';
+    els.rankList.innerHTML = '<div style="text-align:center; color:#a9d3ff; padding:0.5rem;">加载中...</div>';
+    socket.emit('leaderboard', (res) => {
+        if (!res || !res.ok) {
+            els.rankList.innerHTML = '<div style="text-align:center; color:#ff6b6b; padding:0.5rem;">加载失败</div>';
+            return;
+        }
+        els.rankList.innerHTML = '';
+        if (!res.list.length) {
+            els.rankList.innerHTML = '<div style="text-align:center; color:#a9d3ff; padding:0.5rem;">暂无数据</div>';
+            return;
+        }
+        res.list.forEach((item, i) => {
+            const row = document.createElement('div');
+            row.className = 'rank-item';
+            row.innerHTML = `
+                <span class="rank-no">${i + 1}</span>
+                <span class="rank-name">${escapeHtml(item.username)}${item.username === state.myUsername ? ' <span class="game-badge">你</span>' : ''}</span>
+                <span class="rank-score">${item.score}</span>
+            `;
+            els.rankList.appendChild(row);
+        });
+    });
+});
+
+els.rankCloseBtn.addEventListener('click', () => {
+    els.rankModal.style.display = 'none';
+});
 
 /* ---------- 对局按钮 ---------- */
 els.leaveRoomBtn.addEventListener('click', () => {

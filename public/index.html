@@ -55,7 +55,15 @@
                 </div>
                 <button id="createRoomBtn" style="width:100%; margin-top:0.5rem;">创建房间</button>
             </div>
+            <button id="rankBtn" style="width:100%; max-width:320px; margin:0.5rem auto 0;">排行榜</button>
             <div class="error-msg" id="lobbyError"></div>
+            <div id="rankModal" style="display:none; margin-top:0.8rem; max-width:320px; margin-left:auto; margin-right:auto; text-align:left;">
+                <div class="info" style="text-align:center; font-weight:bold; font-size:1rem; color:#ffd9a0;">积分排行榜 TOP 10</div>
+                <div class="rank-list" id="rankList"></div>
+                <div style="display:flex; gap:0.8rem; justify-content:center; margin-top:0.5rem;">
+                    <button class="small secondary" id="rankCloseBtn">关闭</button>
+                </div>
+            </div>
             <div id="pwdPanel" style="display:none; margin-top: 0.8rem; max-width: 320px; margin-left: auto; margin-right: auto;">
                 <div class="form-group">
                     <label>房间 <span id="pwdRoomId"></span> 密码</label>

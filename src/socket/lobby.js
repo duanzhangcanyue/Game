@@ -1,11 +1,19 @@
 const { rooms, roomSummary, broadcastRooms, getRoomForUser, startGame, resetRoom } = require('../rooms');
-const { getScore } = require('../users');
+const { getScore, listUsers } = require('../users');
 const { startGrace, resumeIntoRoom } = require('../grace');
 const config = require('../config');
 
 module.exports = function registerLobby(io, socket) {
     socket.on('getRooms', () => {
         socket.emit('roomsUpdate', roomSummary());
+    });
+
+    socket.on('leaderboard', (cb) => {
+        const top = listUsers()
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10)
+            .map(u => ({ username: u.username, score: u.score }));
+        cb && cb({ ok: true, list: top });
     });
 
     socket.on('createRoom', ({ roomId, password, gameType }, cb) => {

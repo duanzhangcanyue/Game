@@ -37,7 +37,7 @@ function renderBoard() {
     ctx.board.classList.remove('board-erdayi', 'board-gomoku');
     ctx.board.classList.add('board-tictactoe');
     ctx.board.style.setProperty('--n', SIZE);
-    ctx.board.style.width = 'min(420px, calc(100vw - 44px))';
+    ctx.board.style.width = 'min(420px, 100%)';
     ctx.board.innerHTML = '';
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {

@@ -262,6 +262,18 @@ input::placeholder { color: rgba(255,255,255,0.5); }
 .score-badge { color: #ffd9a0; font-weight: bold; }
 .error-msg { color: #ff6b6b; min-height: 1.2rem; font-size: 0.9rem; margin: 0.3rem 0; }
 .success-msg { color: #7bed9f; min-height: 1.2rem; font-size: 0.9rem; margin: 0.3rem 0; }
+.rank-list { margin-top: 0.3rem; }
+.rank-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.45rem 0.8rem; border-bottom: 1px solid rgba(255,220,160,0.12);
+    color: #f0e0c8; font-size: 0.95rem;
+}
+.rank-item .rank-no { width: 2.2rem; color: #a9d3ff; font-weight: bold; }
+.rank-item .rank-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-item .rank-score { color: #ffd9a0; font-weight: bold; }
+.rank-item:nth-child(1) { background: rgba(255,180,90,0.18); }
+.rank-item:nth-child(2) { background: rgba(200,210,225,0.12); }
+.rank-item:nth-child(3) { background: rgba(230,160,100,0.12); }
 .game-buttons { display: flex; justify-content: center; gap: 0.8rem; margin-top: 0.8rem; }
 .players-bar {
     display: flex; justify-content: space-between; align-items: center;
