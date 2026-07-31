@@ -3,6 +3,11 @@ const GAME_NAMES = { erdayi: '二打一', gomoku: '五子棋', tictactoe: '井�
 let pendingJoin = null;
 let enterGame = null;
 
+function selectedGameType() {
+    const btn = document.querySelector('#gameSelect button.active');
+    return btn ? btn.dataset.game : 'erdayi';
+}
+
 export function init(app, deps) {
     const socket = app.socket;
     enterGame = deps.enterGame;
@@ -18,7 +23,7 @@ export function init(app, deps) {
         const id = Number(document.getElementById('newRoomId').value);
         const pwd = document.getElementById('newRoomPwd').value;
         const gameTypeBtn = document.querySelector('#gameSelect button.active');
-        const selectedGame = gameTypeBtn ? gameTypeBtn.dataset.game : 'erdayi';
+        const selectedGame = selectedGameType();
         if (!id || id < 1 || id > 10) {
             document.getElementById('lobbyError').textContent = '请输入 1-10 的房间号';
             return;
@@ -37,7 +42,7 @@ export function init(app, deps) {
         const pwd = document.getElementById('pwdInput').value;
         if (pendingJoin) {
             document.getElementById('pwdPanel').style.display = 'none';
-            joinRoom(socket, pendingJoin.id, pwd, enterGame);
+            joinRoom(socket, pendingJoin.id, pwd, enterGame, pendingJoin.gameType);
             pendingJoin = null;
         }
     });
@@ -52,8 +57,8 @@ export function init(app, deps) {
     });
 }
 
-function joinRoom(socket, rid, pwd, enterGame) {
-    socket.emit('joinRoom', { roomId: rid, password: pwd }, (res) => {
+function joinRoom(socket, rid, pwd, enterGame, gameType) {
+    socket.emit('joinRoom', { roomId: rid, password: pwd, gameType }, (res) => {
         if (res.ok) {
             document.getElementById('lobbyError').textContent = '';
             enterGame(res.roomId, res.gameType, false);
@@ -87,9 +92,9 @@ export function renderRooms(app, rooms) {
                 document.getElementById('pwdInput').value = '';
                 document.getElementById('pwdPanel').style.display = 'block';
                 document.getElementById('pwdInput').focus();
-                pendingJoin = { id: room.id };
+                pendingJoin = { id: room.id, gameType: selectedGameType() };
             } else {
-                joinRoom(socket, room.id, '', enterGame);
+                joinRoom(socket, room.id, '', enterGame, selectedGameType());
             }
         });
         grid.appendChild(card);

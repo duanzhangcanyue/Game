@@ -27,7 +27,7 @@ module.exports = function registerLobby(io, socket) {
         console.log(`${username} 创建房间 ${id} [${type}]`);
     });
 
-    socket.on('joinRoom', ({ roomId, password }, cb) => {
+    socket.on('joinRoom', ({ roomId, password, gameType }, cb) => {
         const username = socket.data.username;
         if (!username) return cb && cb({ ok: false, msg: '请先登录' });
         const id = Number(roomId);
@@ -38,6 +38,9 @@ module.exports = function registerLobby(io, socket) {
         const myRoom = getRoomForUser(username);
         if (myRoom) return cb && cb({ ok: false, msg: `你已在房间 ${myRoom.id} 中` });
         if (room.players.includes(username)) return cb && cb({ ok: false, msg: '你已在房间中' });
+        if (room.players.length === 0 && config.GAME_TYPES.includes(gameType)) {
+            room.gameType = gameType;
+        }
         room.players.push(username);
         socket.join('room_' + id);
         cb && cb({ ok: true, roomId: id, gameType: room.gameType });
