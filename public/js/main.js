@@ -68,7 +68,8 @@ const state = {
     roomId: (savedSession && savedSession.roomId) || null,
     gameType: null,
     activeGame: null,
-    started: false
+    started: false,
+    usernames: { black: null, white: null }
 };
 
 const app = { socket, els, state };
@@ -87,7 +88,8 @@ const ctx = {
     countInfo: els.countInfo,
     restartBtn: els.restartBtn,
     getRoomId: () => state.roomId,
-    getMyUsername: () => state.myUsername
+    getMyUsername: () => state.myUsername,
+    getUsername: (color) => state.usernames[color]
 };
 
 async function loadGame(gameType) {
@@ -136,6 +138,7 @@ function setPlayerSyms() {
 }
 
 function setWaitingPlayer(color, name, score) {
+    state.usernames[color] = name;
     const card = color === 'black' ? els.playerBlack : els.playerWhite;
     const other = card === els.playerBlack ? els.playerWhite : els.playerBlack;
     card.querySelector('.player-name').textContent = name;
@@ -146,6 +149,8 @@ function setWaitingPlayer(color, name, score) {
 
 function updatePlayersBar(info) {
     setPlayerSyms();
+    state.usernames.black = info.black.username;
+    state.usernames.white = info.white.username;
     const black = els.playerBlack;
     const white = els.playerWhite;
     black.querySelector('.player-name').textContent = info.black.username;
@@ -306,7 +311,7 @@ socket.on('symbolUpdate', (data) => {
         const name = data.gameType === 'tictactoe'
             ? (data.symbol === 'black' ? 'X' : 'O')
             : data.gameType === 'energywar'
-                ? (data.symbol === 'black' ? '黑方' : '白方')
+                ? state.myUsername
                 : (data.symbol === 'black' ? '黑棋' : '白棋');
         els.info.textContent = `第 ${data.round} 局，你是 ${name} 方`;
     };

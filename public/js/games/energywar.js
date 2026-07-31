@@ -20,13 +20,15 @@ function stopCountdown() {
 }
 
 function colorName(color) {
+    if (ctx && ctx.getUsername && ctx.getUsername(color)) return ctx.getUsername(color);
     if (!mySymbol) return color === 'black' ? '黑方' : '白方';
     return color === mySymbol ? '你' : (color === 'black' ? '黑方' : '白方');
 }
 
 function persp(color) {
-    if (!mySymbol) return color === 'black' ? '黑方' : '白方';
-    return color === mySymbol ? '你' : '对方';
+    const name = (ctx && ctx.getUsername) ? ctx.getUsername(color) : null;
+    if (!mySymbol) return name || (color === 'black' ? '黑方' : '白方');
+    return color === mySymbol ? '你' : (name || '对方');
 }
 
 function eventText(ev) {
