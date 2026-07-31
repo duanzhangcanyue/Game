@@ -54,7 +54,7 @@ function emitSymbols(io, room, black, white, round) {
 }
 
 function blackPlayer(room) {
-    return room.round % 2 === 1 ? room.players[0] : room.players[1];
+    return room.players[0];
 }
 
 function startGame(io, room, getScore) {

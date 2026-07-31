@@ -52,9 +52,13 @@ module.exports = function registerGame(io, socket) {
             room.boardState = null;
             room.over = false;
             room.energyState = null;
-            const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
-            const white = black === room.players[0] ? room.players[1] : room.players[0];
+            const black = room.players[0];
+            const white = room.players[1];
             emitSymbols(io, room, black, white, room.round);
+            io.to('room_' + room.id).emit('playerInfo', {
+                black: { username: black, score: getScore(black) },
+                white: { username: white, score: getScore(white) }
+            });
             if (room.gameType === 'energywar') startRoundTimer(io, room);
             console.log(`房间 ${roomId} 双方同时请求，第 ${room.round} 局`);
             return;
@@ -73,9 +77,13 @@ module.exports = function registerGame(io, socket) {
         room.boardState = null;
         room.over = false;
         room.energyState = null;
-        const black = room.round % 2 === 1 ? room.players[0] : room.players[1];
-        const white = black === room.players[0] ? room.players[1] : room.players[0];
+        const black = room.players[0];
+        const white = room.players[1];
         emitSymbols(io, room, black, white, room.round);
+        io.to('room_' + room.id).emit('playerInfo', {
+            black: { username: black, score: getScore(black) },
+            white: { username: white, score: getScore(white) }
+        });
         if (room.gameType === 'energywar') startRoundTimer(io, room);
         console.log(`房间 ${roomId} 第 ${room.round} 局`);
     });
