@@ -53,6 +53,10 @@ function emitSymbols(io, room, black, white, round) {
     io.to('room_' + room.id).emit('symbolUpdate', { symbol: 'white', round, for: white, gameType: room.gameType });
 }
 
+function blackPlayer(room) {
+    return room.round % 2 === 1 ? room.players[0] : room.players[1];
+}
+
 function startGame(io, room, getScore) {
     room.round = 1;
     room.pendingRestart = false;
@@ -82,5 +86,6 @@ module.exports = {
     getRoomForUser,
     resetRoom,
     startGame,
-    emitSymbols
+    emitSymbols,
+    blackPlayer
 };

@@ -1,5 +1,5 @@
 const config = require('./config');
-const { resetRoom, broadcastRooms } = require('./rooms');
+const { resetRoom, broadcastRooms, blackPlayer } = require('./rooms');
 const { users, saveUsers, getScore } = require('./users');
 const { startRoundTimer, clearRoundTimer } = require('./socket/energy');
 
@@ -61,7 +61,7 @@ function finishGrace(io, room, username) {
 function resumeIntoRoom(io, socket, room, username) {
     cancelGrace(room, username);
     socket.join('room_' + room.id);
-    const symbol = room.players[0] === username ? 'black' : 'white';
+    const symbol = blackPlayer(room) === username ? 'black' : 'white';
     io.to('room_' + room.id).emit('playerInfo', {
         black: { username: room.players[0], score: getScore(room.players[0]) },
         white: { username: room.players[1], score: getScore(room.players[1]) }

@@ -1,6 +1,7 @@
 const { rooms } = require('../rooms');
 const { users, saveUsers, getScore } = require('../users');
 const { newState, resolve, MAX_HP, MAX_ENERGY } = require('../energywar');
+const { blackPlayer } = require('../rooms');
 const config = require('../config');
 
 const VALID_ACTIONS = ['gather', 'block', 'fire', 'heal'];
@@ -67,8 +68,9 @@ function resolveRound(io, room, autoFilled) {
     console.log(`房间 ${room.id} [能量战] 结束: ${JSON.stringify(picksSnapshot)} -> winner=${winner}`);
     if (winner === 'draw') return;
 
-    const winnerUser = winner === 'black' ? room.players[0] : room.players[1];
-    const loserUser = winner === 'black' ? room.players[1] : room.players[0];
+    const black = blackPlayer(room);
+    const winnerUser = winner === 'black' ? black : room.players.find(p => p !== black);
+    const loserUser = winner === 'black' ? room.players.find(p => p !== black) : black;
     if (winnerUser && loserUser && users[winnerUser] && users[loserUser]) {
         users[winnerUser].score += config.WIN_SCORE;
         users[loserUser].score -= config.WIN_SCORE;
@@ -78,8 +80,8 @@ function resolveRound(io, room, autoFilled) {
             [loserUser]: users[loserUser].score
         });
         io.to('room_' + room.id).emit('playerInfo', {
-            black: { username: room.players[0], score: getScore(room.players[0]) },
-            white: { username: room.players[1], score: getScore(room.players[1]) }
+            black: { username: black, score: getScore(black) },
+            white: { username: room.players.find(p => p !== black), score: getScore(room.players.find(p => p !== black)) }
         });
         console.log(`积分: ${winnerUser} +${config.WIN_SCORE}, ${loserUser} -${config.WIN_SCORE}`);
     }
@@ -95,7 +97,7 @@ module.exports = function registerEnergy(io, socket) {
         if (!username || !room.players.includes(username)) return;
         if (!room.energyState) room.energyState = newState();
         const st = room.energyState;
-        const symbol = room.players[0] === username ? 'black' : 'white';
+        const symbol = blackPlayer(room) === username ? 'black' : 'white';
         const action = data.action;
         if (!VALID_ACTIONS.includes(action)) return;
         if (st.picks[symbol]) return;
