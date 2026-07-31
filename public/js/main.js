@@ -35,7 +35,8 @@ const state = {
     myScore: 0,
     roomId: null,
     gameType: null,
-    activeGame: null
+    activeGame: null,
+    started: false
 };
 
 const app = { socket, els, state };
@@ -66,10 +67,12 @@ async function loadGame(gameType) {
 function enterGame(roomId, gameType, isCreator) {
     state.roomId = roomId;
     state.gameType = gameType;
+    state.started = false;
     setPlayerSyms();
     showView('game');
     els.restartConfirm.style.display = 'none';
     loadGame(gameType).then((game) => {
+        if (state.started) return;
         els.status.textContent = '';
         els.info.textContent = isCreator ? '房间已创建，等待对手加入...' : '已加入房间，等待对方就位...';
         els.restartBtn.disabled = true;
@@ -176,6 +179,7 @@ socket.on('symbolUpdate', (data) => {
     if (data.for && data.for !== state.myUsername) return;
     els.restartConfirm.style.display = 'none';
     const startGame = (game) => {
+        state.started = true;
         game.init(ctx, data.symbol, data.round);
         const name = data.gameType === 'tictactoe'
             ? (data.symbol === 'black' ? 'X' : 'O')
